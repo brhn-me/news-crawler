@@ -1,0 +1,162 @@
+package com.cn.crawler.core;
+
+import com.cn.crawler.Config;
+import com.cn.crawler.Params;
+import com.cn.crawler.entities.Link;
+import com.cn.crawler.parsers.BDNewsBanglaParser;
+import com.cn.crawler.parsers.ProthomAloParser;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
+
+import javax.annotation.PreDestroy;
+import javax.inject.Inject;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.net.MalformedURLException;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Scanner;
+import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
+/**
+ * Created by burhan on 5/30/17.
+ */
+@Service
+public class Crawler {
+    private static final Logger log = LoggerFactory.getLogger(Crawler.class);
+    @Inject
+    private Config config;
+    private Params params;
+    @Inject
+    private Data data;
+
+    private Set<Link> seeds = new HashSet<>();
+    private HashMap<String, Agent> agents = new HashMap<>();
+    private HashMap<String, Class> parsers = new HashMap<>();
+    ExecutorService executor = Executors.newFixedThreadPool(50);
+
+
+    public Crawler() {
+
+    }
+
+    public void boostrap(Params params){
+        this.setParams(params);
+        this.loadSeeds(params.getSeedPath());
+        this.registerParsers();
+        this.createAgents();
+        this.start();
+    }
+
+    public Params getParams() {
+        return params;
+    }
+
+    public void setParams(Params params) {
+        this.params = params;
+    }
+
+    public Config getConfig() {
+        return config;
+    }
+
+    public Data getData() {
+        return data;
+    }
+
+    public void registerParsers(){
+        parsers.put("prothom-alo.com", ProthomAloParser.class);
+        parsers.put("bangla.bdnews24.com", BDNewsBanglaParser.class);
+    }
+
+    public void loadSeeds(String seedPath) {
+        log.info("Loading seed files...");
+        File folder = new File(seedPath);
+        if (!folder.exists() || !folder.isDirectory()) {
+            throw new RuntimeException("Seed directory : '" + seedPath + "' does not exits");
+        }
+        File[] files = folder.listFiles();
+        Set<Link> links = new HashSet<>();
+        for (File file : files) {
+            try {
+                try (Scanner scanner = new Scanner(file)) {
+                    while (scanner.hasNextLine()) {
+                        String url = scanner.nextLine();
+                        try {
+                            Link link = new Link(url, 0);
+                            links.add(link);
+                        } catch (MalformedURLException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                    scanner.close();
+
+                }
+            } catch (FileNotFoundException e) {
+                throw new RuntimeException("Seed file : '" + file.getAbsolutePath() + "' does not exits");
+            }
+        }
+        this.seeds = links;
+    }
+
+    public void createAgents() {
+        log.info("Creating agents...");
+        for (Link link : this.seeds) {
+            String domain = link.getDomain();
+
+            if(!parsers.containsKey(domain)){
+                log.error("Parser not found for domain : "+ domain + ". Seed url '"+ link.getUrl() + "' would be ignored");
+                continue;
+            }
+            Class type = parsers.get(domain);
+            AbstractParser parser = null;
+            try {
+                parser = (AbstractParser) type.newInstance();
+            } catch (InstantiationException ex){
+                log.error("Failed to instantiate parser for domain : "+ domain + ". Seed url '"+ link.getUrl() + "' would be ignored");
+                continue;
+            } catch (IllegalAccessException ex){
+                log.error("Failed to instantiate parser for domain : "+ domain + ". Seed url '"+ link.getUrl() + "' would be ignored");
+                continue;
+            }
+
+            if(parser == null){
+                log.error("Parser not found for domain : "+ domain + ". Seed url '"+ link.getUrl() + "' would be ignored");
+                continue;
+            }
+
+            if (!agents.containsKey(domain)) {
+                Queue q = new Queue(data, domain);
+                q.add(link);
+                q.loadState();
+
+                Agent agent = new Agent(this, q, parser);
+                agents.put(domain, agent);
+            } else {
+                Agent agent = agents.get(domain);
+                agent.getQueue().add(link);
+            }
+        }
+    }
+
+    public void start() {
+        log.info("Starting crawler...");
+        for (String domain : agents.keySet()) {
+            Agent agent = agents.get(domain);
+            agent.start(executor);
+        }
+    }
+
+
+    @PreDestroy
+    public void destroy(){
+        log.info("Shutting down crawler...");
+        for (String domain : agents.keySet()) {
+            Agent agent = agents.get(domain);
+            agent.saveState();
+        }
+    }
+}
