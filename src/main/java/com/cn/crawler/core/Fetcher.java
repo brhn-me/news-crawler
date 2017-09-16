@@ -62,7 +62,12 @@ public class Fetcher implements Runnable {
     public Connection.Response fetch(Link link) throws IOException {
         String url = Utils.getEncodedUrl(link.getUrl());
         log.info("Fetching: " + link.getUrl() + ", Queue : " + queue.size() + 1);
-        Connection.Response response = Jsoup.connect(url).timeout(config.getTimeout()).execute();
+        Connection.Response response = Jsoup
+                .connect(url)
+                .userAgent("Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:25.0) Gecko/20100101 Firefox/25.0")
+                .referrer("http://www.google.com")
+                .timeout(config.getTimeout())
+                .execute();
         return response;
     }
 
@@ -116,9 +121,7 @@ public class Fetcher implements Runnable {
                 if (!Utils.isNullOrEmpty(url) && isValidUrl(url)) {
                     try {
                         Link l = new Link(url, link.getDepth() + 1);
-                        if (queue.getDomain().equalsIgnoreCase(l.getDomain())) {
-                            queue.add(l);
-                        }
+                        queue.add(l);
                     } catch (MalformedURLException e) {
                         log.error(e.getMessage() + link);
                     }

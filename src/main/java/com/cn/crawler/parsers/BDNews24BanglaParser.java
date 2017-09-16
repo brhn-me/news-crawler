@@ -15,8 +15,8 @@ import java.util.Set;
 /**
  * Created by burhan on 5/19/17.
  */
-public class BDNewsBanglaParser extends AbstractParser {
-    public BDNewsBanglaParser(){
+public class BDNews24BanglaParser extends AbstractParser {
+    public BDNews24BanglaParser(){
     }
 
     @Override

@@ -19,7 +19,7 @@ public class Queue implements java.util.Queue<Link>{
     private LinkedHashSet<Link> error = new LinkedHashSet<>();
     private LinkedHashSet<Link> queue = new LinkedHashSet<>();
     private List<Link> changes = new ArrayList<>();
-    private static final int BATCH_MAX = 10000;
+    private static final int BATCH_MAX = 1000;
 
     public Queue(Data data, String domain) {
         this.data = data;
@@ -70,6 +70,9 @@ public class Queue implements java.util.Queue<Link>{
 
     @Override
     public boolean add(Link link) {
+        if(!domain.equalsIgnoreCase(link.getDomain()) || queue.contains(link) || visited.contains(link) || error.contains(link)){
+            return false;
+        }
         trackChanges(link);
         return queue.add(link);
     }

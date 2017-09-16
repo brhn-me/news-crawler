@@ -2,10 +2,7 @@ package com.cn.crawler.core;
 
 import com.cn.crawler.Params;
 import com.cn.crawler.entities.Link;
-import com.cn.crawler.parsers.BDNewsBanglaParser;
-import com.cn.crawler.parsers.KalerKanthoParser;
-import com.cn.crawler.parsers.ProthomAloParser;
-import com.cn.crawler.parsers.SamakalParser;
+import com.cn.crawler.parsers.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -71,9 +68,11 @@ public class Crawler {
 
     public void registerParsers(){
         parsers.put("prothom-alo.com", ProthomAloParser.class);
-        parsers.put("bangla.bdnews24.com", BDNewsBanglaParser.class);
+        parsers.put("bangla.bdnews24.com", BDNews24BanglaParser.class);
         parsers.put("kalerkantho.com", KalerKanthoParser.class);
         parsers.put("samakal.com", SamakalParser.class);
+        parsers.put("banglanews24.com", BanglaNews24Parser.class);
+        parsers.put("ittefaq.com.bd", IttefaqParser.class);
     }
 
     public void loadSeeds(String seedPath) {
@@ -89,6 +88,10 @@ public class Crawler {
                 try (Scanner scanner = new Scanner(file)) {
                     while (scanner.hasNextLine()) {
                         String url = scanner.nextLine();
+                        // ignore commented
+                        if(url.startsWith("#")){
+                            continue;
+                        }
                         try {
                             Link link = new Link(url, 0);
                             links.add(link);
