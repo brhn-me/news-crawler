@@ -2,6 +2,7 @@ package com.cn.crawler;
 
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.ParameterException;
+import com.cn.crawler.core.Config;
 import com.cn.crawler.core.Crawler;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;

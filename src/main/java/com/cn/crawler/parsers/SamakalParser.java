@@ -1,10 +1,10 @@
 package com.cn.crawler.parsers;
 
 import com.cn.crawler.core.AbstractParser;
-import com.cn.crawler.entities.Link;
 import com.cn.crawler.core.ParseException;
-import com.cn.crawler.utils.Utils;
+import com.cn.crawler.entities.Link;
 import com.cn.crawler.entities.News;
+import com.cn.crawler.utils.Utils;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
@@ -15,38 +15,34 @@ import java.util.Set;
 /**
  * Created by burhan on 5/19/17.
  */
-public class BDNewsBanglaParser extends AbstractParser {
-    public BDNewsBanglaParser(){
+public class SamakalParser extends AbstractParser {
+    public SamakalParser(){
     }
 
     @Override
     protected boolean isParsable(Link link, Document doc) throws ParseException {
-        if(link.getUrl().endsWith(".bdnews")){
+        if(link.getUrl().contains("/article/")){
             return true;
         }
         return false;
     }
 
+    @Override
     public News parseHandler(Link link, Document doc) throws NullPointerException {
-        String date = doc.select("#main .dateline span").last().text();
-        String title = doc.select("#main .article h1").text();
-        String content = Utils.br2nl(doc.select("#main .article_body").html());
+
+        String title = doc.select("h1.detail-headline ").text();
+        String content = Utils.br2nl(doc.select(".container .description").html());
+
+        //String date = doc.select(".time span").last().text();
 
         Set<String> categories = new HashSet<>();
-        Elements breadcrumb = doc.select("#main .breadcrumb a");
-        if(breadcrumb.size() > 0) {
-            String category = breadcrumb.last().text();
-            categories.add(category);
-        }
+        categories.add(doc.select("h1 span.category-title").text());
 
         Set<String> images = new HashSet<>();
-        Elements elements = doc.select("#main .article_body img");
-        for(Element img : elements){
-            images.add(img.attr("src"));
-        }
+        images.add(doc.select(".container .image-container.image img").attr("src"));
 
         News news = new News();
-        news.setDate(date);
+        //news.setDate(date);
         news.setTitle(title);
         news.setCategories(categories);
         news.setContent(content);

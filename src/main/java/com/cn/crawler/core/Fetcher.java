@@ -1,7 +1,6 @@
 package com.cn.crawler.core;
 
 
-import com.cn.crawler.Config;
 import com.cn.crawler.entities.Link;
 import com.cn.crawler.entities.News;
 import com.cn.crawler.utils.Utils;
@@ -17,8 +16,7 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.util.ArrayList;
-import java.util.List;
+import java.security.NoSuchAlgorithmException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -48,9 +46,9 @@ public class Fetcher implements Runnable {
         this.data = crawler.getData();
         this.maxDepth = crawler.getParams().getDepth();
         String crawlPath = crawler.getParams().getCrawlPath();
-        if(!Utils.isNullOrEmpty(crawlPath)){
+        if (!Utils.isNullOrEmpty(crawlPath)) {
             this.crawlPath = new File(crawler.getParams().getCrawlPath());
-        } else{
+        } else {
             this.crawlPath = null;
         }
     }
@@ -62,8 +60,8 @@ public class Fetcher implements Runnable {
     }
 
     public Connection.Response fetch(Link link) throws IOException {
-        String url = link.getUrl();
-        log.info("Fetching: " + url + ", Queue : " + queue.size() + 1);
+        String url = Utils.getEncodedUrl(link.getUrl());
+        log.info("Fetching: " + link.getUrl() + ", Queue : " + queue.size() + 1);
         Connection.Response response = Jsoup.connect(url).timeout(config.getTimeout()).execute();
         return response;
     }
@@ -88,19 +86,34 @@ public class Fetcher implements Runnable {
             return;
         }
         Document doc = response.parse();
+        // calculate hash for link
+        try {
+            String hash = Utils.md5(doc.outerHtml());
+
+            if (link.getStatus() == Status.V) {
+                if (hash.equals(link.getStatus())) {
+                    // content has not changed yet
+                    log.info("No change on url : " + link.getUrl());
+                    return;
+                }
+            }
+            link.setHash(hash);
+        } catch (NoSuchAlgorithmException e) {
+            log.error("Failed to calculate hash for link : " + link);
+        }
         try {
             News news = parser.parse(link, doc);
-            if(news != null) {
+            if (news != null) {
                 save(link, news);
             }
         } catch (ParseException e) {
-            log.error("Failed to parse link : "+link);
+            log.error("Failed to parse link : " + link);
         }
         if (link.getDepth() < maxDepth) {
             Elements linkElements = doc.select("a[href]");
             for (Element linkElement : linkElements) {
                 String url = linkElement.absUrl("href");
-                if (isValidUrl(url)) {
+                if (!Utils.isNullOrEmpty(url) && isValidUrl(url)) {
                     try {
                         Link l = new Link(url, link.getDepth() + 1);
                         if (queue.getDomain().equalsIgnoreCase(l.getDomain())) {
@@ -114,9 +127,9 @@ public class Fetcher implements Runnable {
         }
     }
 
-    private void save(Link link, News news){
+    private void save(Link link, News news) {
         log.debug(" - Saving: " + link.getUrl());
-        if(crawlPath != null) {
+        if (crawlPath != null) {
             try {
                 save2File(link, news);
             } catch (IOException e) {
@@ -127,7 +140,7 @@ public class Fetcher implements Runnable {
     }
 
     private void save2File(Link link, News news) throws IOException {
-        String path = crawlPath.getAbsolutePath() + File.separator +  link.getDomain() + File.separator + news.getId();
+        String path = crawlPath.getAbsolutePath() + File.separator + link.getDomain() + File.separator + news.getId();
         String json = gson.toJson(news);
         Utils.save2File(path, json);
     }
@@ -153,9 +166,11 @@ public class Fetcher implements Runnable {
                 log.error(link + e.getMessage());
                 e.printStackTrace();
             }
+            if (queue.size() < 1) {
+                System.out.println("Fetcher shutting down on : " + queue.getDomain());
+                break;
+            }
         }
-
     }
-
 
 }

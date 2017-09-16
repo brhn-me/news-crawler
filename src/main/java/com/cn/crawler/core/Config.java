@@ -1,4 +1,4 @@
-package com.cn.crawler;
+package com.cn.crawler.core;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 public class Config {
 
     private final Database database = new Database();
+    private final Agent agent = new Agent();
     private final Fetcher fetcher = new Fetcher();
 
     public Database getDatabase() {
@@ -21,6 +22,10 @@ public class Config {
 
     public Fetcher getFetcher() {
         return fetcher;
+    }
+
+    public Agent getAgent() {
+        return agent;
     }
 
     public static class Database{
@@ -44,11 +49,22 @@ public class Config {
         }
     }
 
+    public static class Agent{
+        private int fetchers;
+
+        public int getFetchers() {
+            return fetchers;
+        }
+
+        public void setFetchers(int fetchers) {
+            this.fetchers = fetchers;
+        }
+    }
+
     public static class Fetcher{
         private int pool;
         private int timeout;
         private int delay;
-        private int perqueue;
 
         public int getPool() {
             return pool;
@@ -73,13 +89,5 @@ public class Config {
         public void setDelay(int delay) {
             this.delay = delay;
         }
-
-        public int getPerqueue() {
-            return perqueue;
-        }
-
-        public void setPerqueue(int perqueue) {
-            this.perqueue = perqueue;
-        }
-    }
+   }
 }

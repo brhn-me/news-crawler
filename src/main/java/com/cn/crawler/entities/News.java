@@ -3,6 +3,7 @@ package com.cn.crawler.entities;
 import java.io.Serializable;
 import java.util.Set;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
 
 /**
  * Created by burhan on 9/12/17.

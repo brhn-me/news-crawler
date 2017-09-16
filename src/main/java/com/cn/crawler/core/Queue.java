@@ -4,6 +4,7 @@ import com.cn.crawler.entities.Link;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.time.ZonedDateTime;
 import java.util.*;
 
 /**
@@ -18,7 +19,7 @@ public class Queue implements java.util.Queue<Link>{
     private LinkedHashSet<Link> error = new LinkedHashSet<>();
     private LinkedHashSet<Link> queue = new LinkedHashSet<>();
     private List<Link> changes = new ArrayList<>();
-    private static final int BATCH_MAX = 1000;
+    private static final int BATCH_MAX = 10000;
 
     public Queue(Data data, String domain) {
         this.data = data;
@@ -153,13 +154,15 @@ public class Queue implements java.util.Queue<Link>{
     }
 
     public boolean setVisited(Link link){
-        link.setStatus(Status.VISITED);
+        link.setStatus(Status.V);
+        link.setDate(new Date());
         trackChanges(link);
         return visited.add(link);
     }
 
     public boolean setError(Link link){
-        link.setStatus(Status.ERROR);
+        link.setStatus(Status.E);
+        link.setDate(new Date());
         trackChanges(link);
         return error.add(link);
     }
@@ -173,15 +176,19 @@ public class Queue implements java.util.Queue<Link>{
         }
     }
 
-    public void loadState(){
+    public void loadState(final boolean update){
         List<Link> links = data.getLinksByDomain(domain);
-        for(Link link : links){
-            if(link.getStatus() == Status.VISITED){
-                visited.add(link);
-            } else if (link.getStatus() == Status.ERROR){
-                error.add(link);
-            } else {
-                queue.add(link);
+        if(update) {
+            queue.addAll(links);
+        } else {
+            for (Link link : links) {
+                if (link.getStatus() == Status.V) {
+                    visited.add(link);
+                } else if (link.getStatus() == Status.E) {
+                    error.add(link);
+                } else {
+                    queue.add(link);
+                }
             }
         }
         log.info("Loaded state for : " + this.toString());

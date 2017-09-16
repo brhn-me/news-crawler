@@ -17,6 +17,9 @@ public class Params {
     @Parameter(names = {"--depth", "-d"}, description = "Maximum depth of web to explore", validateWith = PositiveInteger.class)
     private Integer depth = 1;
 
+    @Parameter(names = {"--update-links", "-ul"}, description = "Explore visited urls", arity = 1)
+    private boolean updateLinks = false;
+
     public String getSeedPath() {
         return seedPath;
     }
@@ -27,6 +30,10 @@ public class Params {
 
     public Integer getDepth() {
         return depth;
+    }
+
+    public boolean getUpdateLinks() {
+        return updateLinks;
     }
 }
 

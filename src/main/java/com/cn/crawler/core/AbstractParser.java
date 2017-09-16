@@ -2,11 +2,22 @@ package com.cn.crawler.core;
 
 import com.cn.crawler.entities.Link;
 import com.cn.crawler.entities.News;
+import com.cn.crawler.parsers.BDNewsBanglaParser;
+import com.cn.crawler.parsers.KalerKanthoParser;
+import com.cn.crawler.parsers.ProthomAloParser;
+import com.cn.crawler.parsers.SamakalParser;
 import com.cn.crawler.utils.Utils;
+import org.jsoup.Connection;
+import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.MalformedURLException;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.security.NoSuchAlgorithmException;
 
 /**
@@ -14,23 +25,24 @@ import java.security.NoSuchAlgorithmException;
  */
 public abstract class AbstractParser {
     private static final Logger log = LoggerFactory.getLogger(Fetcher.class);
-    protected final String baseUrl;
 
-    public AbstractParser(String baseUrl){
-        this.baseUrl = baseUrl;
+    public AbstractParser() {
     }
 
     protected abstract boolean isParsable(Link link, Document doc) throws ParseException;
 
     protected abstract News parseHandler(Link link, Document doc) throws ParseException;
 
-    public News parse(Link link, Document doc) throws ParseException{
-        if(isParsable(link, doc)){
+    public News parse(Link link, Document doc) throws ParseException {
+        if (isParsable(link, doc)) {
             try {
                 log.debug(" - Parsing: " + link.getUrl());
                 News news = parseHandler(link, doc);
-                if(news != null) {
+                if (news != null) {
                     try {
+                        //String url = link.getUrl();
+                        String url = URLDecoder.decode( link.getUrl(), "UTF-8" );
+                        news.setUrl(url);
                         news.setId(Utils.md5(news.getUrl()));
                         news.setHash(Utils.md5(news.getContent()));
                     } catch (NoSuchAlgorithmException e) {
@@ -39,10 +51,54 @@ public abstract class AbstractParser {
                     }
                 }
                 return news;
-            } catch (Exception ex){
-                throw  new ParseException("Failed to parse : " + link.toString(), ex);
+            } catch (Exception ex) {
+                throw new ParseException("Failed to parse : " + link.toString(), ex);
             }
         }
         return null;
+    }
+
+    public static void test(String url, Class c) {
+        Link link = null;
+        try {
+            link = new Link(url, 0);
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+        System.out.println("Testing : " + link.getUrl());
+        try {
+            url = Utils.getEncodedUrl(url);
+            Connection.Response response = Jsoup.connect(url).timeout(60 * 1000).execute();
+            Document doc = response.parse();
+            AbstractParser parser = (AbstractParser) c.newInstance();
+
+
+            News news = parser.parse(link, doc);
+            if (news != null) {
+                System.out.println(news.toString());
+            } else {
+                System.err.println("Parse failed");
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        } catch (InstantiationException e) {
+            e.printStackTrace();
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+    }
+
+
+    public static void main(String[] args) {
+        //test("http://www.prothom-alo.com/sports/article/1323321/%E0%A6%AC%E0%A6%BE%E0%A6%82%E0%A6%B2%E0%A6%BE%E0%A6%A6%E0%A7%87%E0%A6%B6-%E0%A6%97%E0%A7%87%E0%A6%B2%E0%A7%87%E0%A6%87-%E0%A6%AE%E0%A6%BE%E0%A6%A0%E0%A6%97%E0%A7%81%E0%A6%B2%E0%A7%8B%E0%A6%B0-%E2%80%98%E0%A6%A4%E0%A6%BE%E0%A6%B2%E0%A6%BE-%E0%A6%96%E0%A7%8B%E0%A6%B2%E0%A7%87%E2%80%99", ProthomAloParser.class);
+        //test("http://bangla.bdnews24.com/politics/article1393999.bdnews", BDNewsBanglaParser.class);
+        //test("http://www.kalerkantho.com/online/national/2017/09/14/542604", KalerKanthoParser.class);
+        //test("http://www.samakal.com/sports/article/1709801/%E0%A6%AA%E0%A7%8D%E0%A6%B0%E0%A6%A5%E0%A6%AE-%E0%A6%86%E0%A6%AB%E0%A6%97%E0%A6%BE%E0%A6%A8-%E0%A6%B9%E0%A6%BF%E0%A6%B8%E0%A7%87%E0%A6%AC%E0%A7%87-%E0%A6%AC%E0%A6%BF%E0%A6%97-%E0%A6%AC%E0%A7%8D%E0%A6%AF%E0%A6%BE%E0%A6%B6%E0%A7%87-%E0%A6%B0%E0%A6%B6%E0%A6%BF%E0%A6%A6", SamakalParser.class);
+        //test("http://www.samakal.com/technology/article/1709703/এলো-আইফোন-এক্স", SamakalParser.class);
+        System.out.println(Utils.getEncodedUrl("http://www.samakal.com/technology/article/1709703/এলো-আইফোন-এক্স?a=324&b=এলো"));
     }
 }

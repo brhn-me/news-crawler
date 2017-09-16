@@ -1,10 +1,11 @@
 package com.cn.crawler.core;
 
-import com.cn.crawler.Config;
 import com.cn.crawler.Params;
 import com.cn.crawler.entities.Link;
 import com.cn.crawler.parsers.BDNewsBanglaParser;
+import com.cn.crawler.parsers.KalerKanthoParser;
 import com.cn.crawler.parsers.ProthomAloParser;
+import com.cn.crawler.parsers.SamakalParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -13,6 +14,7 @@ import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -70,6 +72,8 @@ public class Crawler {
     public void registerParsers(){
         parsers.put("prothom-alo.com", ProthomAloParser.class);
         parsers.put("bangla.bdnews24.com", BDNewsBanglaParser.class);
+        parsers.put("kalerkantho.com", KalerKanthoParser.class);
+        parsers.put("samakal.com", SamakalParser.class);
     }
 
     public void loadSeeds(String seedPath) {
@@ -90,6 +94,8 @@ public class Crawler {
                             links.add(link);
                         } catch (MalformedURLException e) {
                             e.printStackTrace();
+                        } catch (UnsupportedEncodingException e) {
+                            e.printStackTrace();
                         }
                     }
                     scanner.close();
@@ -108,7 +114,7 @@ public class Crawler {
             String domain = link.getDomain();
 
             if(!parsers.containsKey(domain)){
-                log.error("Parser not found for domain : "+ domain + ". Seed url '"+ link.getUrl() + "' would be ignored");
+                log.error("Parser not found for domain '"+ domain + "'. Seed url '"+ link.getUrl() + "' would be ignored");
                 continue;
             }
             Class type = parsers.get(domain);
@@ -131,7 +137,7 @@ public class Crawler {
             if (!agents.containsKey(domain)) {
                 Queue q = new Queue(data, domain);
                 q.add(link);
-                q.loadState();
+                q.loadState(params.getUpdateLinks());
 
                 Agent agent = new Agent(this, q, parser);
                 agents.put(domain, agent);
@@ -143,20 +149,25 @@ public class Crawler {
     }
 
     public void start() {
-        log.info("Starting crawler...");
+        log.info("Starting crawler...[Update Mood: "+ params.getUpdateLinks()+ "]");
         for (String domain : agents.keySet()) {
             Agent agent = agents.get(domain);
             agent.start(executor);
+        }
+        executor.shutdown();
+    }
+
+    public void shutdown(){
+        log.info("Shutting down crawler...");
+        for (String domain : agents.keySet()) {
+            Agent agent = agents.get(domain);
+            agent.saveState();
         }
     }
 
 
     @PreDestroy
     public void destroy(){
-        log.info("Shutting down crawler...");
-        for (String domain : agents.keySet()) {
-            Agent agent = agents.get(domain);
-            agent.saveState();
-        }
+        shutdown();
     }
 }
