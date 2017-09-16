@@ -53,7 +53,7 @@ public class IttefaqParser extends AbstractParser {
         Set<String> images = new HashSet<>();
         Elements elements = doc.select(".detailsNews > .detailsimage img");
         for(Element img : elements){
-            images.add(img.attr("src"));
+            images.add(img.attr("abs:src"));
         }
 
         News news = new News();

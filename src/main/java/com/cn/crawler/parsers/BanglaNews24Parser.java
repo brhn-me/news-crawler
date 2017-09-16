@@ -53,7 +53,7 @@ public class BanglaNews24Parser extends AbstractParser {
         Set<String> images = new HashSet<>();
         Elements elements = doc.select("#main-article table.image img");
         for(Element img : elements){
-            images.add(img.attr("src"));
+            images.add(img.attr("abs:src"));
         }
 
         News news = new News();

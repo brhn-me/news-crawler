@@ -73,6 +73,7 @@ public class Crawler {
         parsers.put("samakal.com", SamakalParser.class);
         parsers.put("banglanews24.com", BanglaNews24Parser.class);
         parsers.put("ittefaq.com.bd", IttefaqParser.class);
+        parsers.put("bd-pratidin.com", BangladeshPratidinParser.class);
     }
 
     public void loadSeeds(String seedPath) {

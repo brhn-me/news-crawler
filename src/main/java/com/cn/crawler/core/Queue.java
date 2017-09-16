@@ -1,9 +1,19 @@
 package com.cn.crawler.core;
 
 import com.cn.crawler.entities.Link;
+import com.cn.crawler.entities.News;
+import com.cn.crawler.utils.Utils;
+import org.jsoup.Connection;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.MalformedURLException;
 import java.time.ZonedDateTime;
 import java.util.*;
 
@@ -204,7 +214,7 @@ public class Queue implements java.util.Queue<Link>{
         all.addAll(visited);
         all.addAll(error);
         data.saveLinks(new ArrayList<>(all));
-        log.info("Saved state for : " + domain);
+        log.info("Saved state for : " + domain+", " +this.toString());
     }
 
     @Override
@@ -215,5 +225,60 @@ public class Queue implements java.util.Queue<Link>{
                 ", error=" + error.size() +
                 ", queue=" + queue.size() +
                 '}';
+    }
+
+
+
+
+    public static void main(String[] args) {
+        LinkedHashSet<Link> queue = new LinkedHashSet<>();
+
+        Link link = null;
+        try {
+            link = new Link("http://www.prothom-alo.com", 0);
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+
+        queue.add(link);
+
+        while(true){
+            Iterator<Link> it = queue.iterator();
+            if(it.hasNext()){
+                link = it.next();
+                queue.remove(link);
+            }
+            System.out.println("Fetching ["+queue.size()+"]: " + link.getUrl());
+            try {
+                String url = Utils.getEncodedUrl(link.getUrl());
+                Connection.Response response = Jsoup
+                        .connect(url)
+                        .userAgent("Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:25.0) Gecko/20100101 Firefox/25.0")
+                        .referrer("http://www.google.com")
+                        .timeout(60 * 1000)
+                        .execute();
+
+                Document doc = response.parse();
+
+                Elements linkElements = doc.select("a[href]");
+                for (Element linkElement : linkElements) {
+                    String childUrl = linkElement.absUrl("href");
+                    if (!Utils.isNullOrEmpty(childUrl)) {
+                        try {
+                            Link l = new Link(childUrl, link.getDepth() + 1);
+                            queue.add(l);
+                        } catch (MalformedURLException e) {
+                            log.error(e.getMessage() + link);
+                        }
+                    }
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+
     }
 }

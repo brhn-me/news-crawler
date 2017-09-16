@@ -100,6 +100,8 @@ public abstract class AbstractParser {
         //test("http://www.kalerkantho.com/online/national/2017/09/14/542604", KalerKanthoParser.class);
         //test("http://www.samakal.com/sports/article/1709801/%E0%A6%AA%E0%A7%8D%E0%A6%B0%E0%A6%A5%E0%A6%AE-%E0%A6%86%E0%A6%AB%E0%A6%97%E0%A6%BE%E0%A6%A8-%E0%A6%B9%E0%A6%BF%E0%A6%B8%E0%A7%87%E0%A6%AC%E0%A7%87-%E0%A6%AC%E0%A6%BF%E0%A6%97-%E0%A6%AC%E0%A7%8D%E0%A6%AF%E0%A6%BE%E0%A6%B6%E0%A7%87-%E0%A6%B0%E0%A6%B6%E0%A6%BF%E0%A6%A6", SamakalParser.class);
         //test("http://www.samakal.com/technology/article/1709703/এলো-আইফোন-এক্স", SamakalParser.class);
-        test("http://www.ittefaq.com.bd/wholecountry/2017/09/16/127562.html", IttefaqParser.class);
+        //test("http://www.ittefaq.com.bd/wholecountry/2017/09/16/127562.html", IttefaqParser.class);
+        //test("http://www.bd-pratidin.com/tech-world/2017/09/16/264490", BangladeshPratidinParser.class);
+        test("http://bonikbarta.net/bangla/news/2017-09-16/131358/%E0%A6%AE%E0%A7%81%E0%A6%B6%E0%A6%AB%E0%A6%BF%E0%A6%95%E0%A7%87%E0%A6%B0-%E0%A6%85%E0%A6%A8%E0%A7%81%E0%A6%B0%E0%A7%8B%E0%A6%A7", BonikBartaParser.class);
     }
 }

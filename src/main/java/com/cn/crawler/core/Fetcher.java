@@ -61,7 +61,7 @@ public class Fetcher implements Runnable {
 
     public Connection.Response fetch(Link link) throws IOException {
         String url = Utils.getEncodedUrl(link.getUrl());
-        log.info("Fetching: " + link.getUrl() + ", Queue : " + queue.size() + 1);
+        log.info("Fetching: " + link.getUrl() + ", Queue : " + queue.size());
         Connection.Response response = Jsoup
                 .connect(url)
                 .userAgent("Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:25.0) Gecko/20100101 Firefox/25.0")
