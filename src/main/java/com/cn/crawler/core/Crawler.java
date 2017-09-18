@@ -5,6 +5,7 @@ import com.cn.crawler.entities.Link;
 import com.cn.crawler.parsers.*;
 import com.cn.crawler.rules.AbstractExploreRule;
 import com.cn.crawler.rules.BBCBanglaExploreRule;
+import com.cn.crawler.rules.RoarBanglaExploreRule;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.mongodb.core.aggregation.ArithmeticOperators;
@@ -72,6 +73,7 @@ public class Crawler {
     }
 
     public void registerParsers(){
+        // news sites
         parsers.put("prothom-alo.com", ProthomAloParser.class);
         parsers.put("bangla.bdnews24.com", BDNews24BanglaParser.class);
         parsers.put("kalerkantho.com", KalerKanthoParser.class);
@@ -88,10 +90,14 @@ public class Crawler {
         parsers.put("jugantor.com", JugantarParser.class);
         parsers.put("anandabazar.com", AnandaBazarParser.class);
         parsers.put("bbc.com", BBCBanglaParser.class);
+
+        // blogs
+        parsers.put("roar.media", RoarBanglaParser.class);
     }
 
     public void registerRules(){
         rules.put("bbc.com", BBCBanglaExploreRule.class);
+        rules.put("roar.media", RoarBanglaExploreRule.class);
     }
 
     public void loadSeeds(String seedPath) {
