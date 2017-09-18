@@ -16,22 +16,17 @@ public class Agent {
     private final Queue queue;
     private final AbstractParser parser;
     private final List<Fetcher> fetchers = new ArrayList<>();
-    private final int numberOfFetchers;
 
     public Agent(Crawler crawler, Queue queue, AbstractParser parser) {
         this.queue = queue;
         this.crawler = crawler;
         this.parser = parser;
-        this.numberOfFetchers = crawler.getConfig().getAgent().getFetchers();
     }
 
-    public void start(ExecutorService executor) {
-        log.info("Running agent on: " + queue.getHost());
-        for (int i = 0; i < numberOfFetchers; i++) {
-            Fetcher fetcher = new Fetcher(crawler, this, queue);
-            fetchers.add(fetcher);
-            executor.submit(fetcher);
-        }
+    public void createFetcher(ExecutorService executor) {
+        Fetcher fetcher = new Fetcher(crawler, this, queue);
+        fetchers.add(fetcher);
+        executor.submit(fetcher);
     }
 
     public Queue getQueue() {

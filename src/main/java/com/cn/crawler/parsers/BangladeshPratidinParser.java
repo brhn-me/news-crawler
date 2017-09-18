@@ -38,12 +38,10 @@ public class BangladeshPratidinParser extends AbstractParser {
         String date = doc.select("#news_update_time").first().text().substring("প্রকাশ : ".length());
         String title = doc.select("#hl2").text();
         doc.select("#newsDtl p").last().remove();
-        Elements paras = doc.select("#newsDtl p");
-        StringBuilder content = new StringBuilder();
-        for(Element para : paras){
-            content.append(para.text());
-            content.append("\r\n\r\n");
-        }
+        doc.select("#newsDtl").prepend(doc.select("#newsDtl p").text());
+        doc.select("#newsDtl div").remove();
+        doc.select("#newsDtl p").remove();
+        String content = Utils.br2nl(doc.select("#newsDtl").html());
 
         Set<String> categories = new HashSet<>();
         Elements breadcrumb = doc.select("ol.breadcrumb li a");
@@ -62,7 +60,7 @@ public class BangladeshPratidinParser extends AbstractParser {
         news.setDate(date);
         news.setTitle(title);
         news.setCategories(categories);
-        news.setContent(content.toString());
+        news.setContent(content);
         news.setImages(images);
 
         return news;

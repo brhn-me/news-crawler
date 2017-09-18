@@ -37,7 +37,7 @@ public class BhorerKagojParser extends AbstractParser {
             content.append("\r\n\r\n");
         }
         Set<String> categories = new HashSet<>();
-        categories.add(doc.select("article .entry-crumbs .entry-crumb").last().text());
+        categories.add(doc.select(".entry-crumbs .entry-crumb").last().text());
 
         Set<String> images = new HashSet<>();
         Elements elements = doc.select("article .td-post-featured-image img");

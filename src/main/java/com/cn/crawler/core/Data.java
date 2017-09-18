@@ -23,8 +23,8 @@ public class Data {
         newsRepository.save(news);
     }
 
-    public List<Link> getLinksByDomain(String domain){
-        return linkRepository.findAllByHost(domain);
+    public List<Link> getLinksByHost(String host){
+        return linkRepository.findAllByHost(host);
     }
 
     public void saveLinks(List<Link> links){

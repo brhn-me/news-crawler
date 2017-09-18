@@ -30,7 +30,10 @@ public class JugantarParser extends AbstractParser {
     public News parseHandler(Link link, Document doc) throws NullPointerException {
         String date = doc.select(".home_page_left_dtl div#rpt").first().nextElementSibling().text().substring("প্রকাশ : ".length());
         if(!Utils.isNullOrEmpty(date)){
-            date = date.substring(0, date.indexOf("|")).trim();
+            int i = date.indexOf("|");
+            if(i > 0) {
+                date = date.substring(0, date.indexOf("|")).trim();
+            }
         }
         String title = doc.select(".home_page_left_dtl div#hl2").text();
         Set<String> categories = new HashSet<>();

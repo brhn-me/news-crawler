@@ -184,9 +184,17 @@ public class Crawler {
 
     public void start() {
         log.info("Starting crawler...[Update Mood: "+ params.getUpdateLinks()+ "]");
-        for (String domain : agents.keySet()) {
-            Agent agent = agents.get(domain);
-            agent.start(executor);
+
+        for(int i = 0; i < config.getAgent().getFetchers(); i++){
+            for (String domain : agents.keySet()) {
+                Agent agent = agents.get(domain);
+                agent.createFetcher(executor);
+            }
+            try {
+                Thread.sleep(5000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         }
         executor.shutdown();
     }

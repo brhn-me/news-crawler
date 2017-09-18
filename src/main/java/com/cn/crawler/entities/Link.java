@@ -15,8 +15,8 @@ import java.util.Date;
  * Created by burhan on 5/30/17.
  */
 public class Link {
-    private String id;
     @Id
+    private String id;
     private String url;
     private Status status;
     private String host;

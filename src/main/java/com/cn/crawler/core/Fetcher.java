@@ -26,7 +26,7 @@ import java.util.regex.Pattern;
  * Created by burhan on 5/31/17.
  */
 public class Fetcher implements Runnable {
-    private static final String EXCLUDE_EXT_PATTERN = "([^\\s]+(\\.(?i)(jpg|png|gif|bmp|ttf|xml|json))$)";
+    private static final String EXCLUDE_EXT_PATTERN = "([^\\s]+(\\.(?i)(jpg|png|gif|bmp|ttf|xml|json|pdf))$)";
     private static final Logger log = LoggerFactory.getLogger(Fetcher.class);
 
     private final Crawler crawler;

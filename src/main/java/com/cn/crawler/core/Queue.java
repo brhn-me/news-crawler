@@ -197,7 +197,7 @@ public class Queue implements java.util.Queue<Link>{
     }
 
     public void loadState(final boolean update){
-        List<Link> links = data.getLinksByDomain(host);
+        List<Link> links = data.getLinksByHost(host);
         if(update) {
             queue.addAll(links);
         } else {
