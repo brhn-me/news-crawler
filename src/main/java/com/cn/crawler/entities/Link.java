@@ -5,9 +5,7 @@ import com.cn.crawler.utils.Utils;
 import org.springframework.data.annotation.Id;
 
 import java.io.UnsupportedEncodingException;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLDecoder;
+import java.net.*;
 import java.security.NoSuchAlgorithmException;
 import java.util.Date;
 
@@ -23,15 +21,15 @@ public class Link {
     private int depth;
     private Date date;
     private String hash;
+    private int priority = 0;
     private boolean isNews = false;
 
     public Link() {
     }
 
-    public Link(String url, int depth) throws MalformedURLException, UnsupportedEncodingException {
+    public Link(String url, int depth) throws MalformedURLException, UnsupportedEncodingException, URISyntaxException {
         URL u = new URL(url);
         String domain = u.getHost();
-
         this.url = Utils.getDecodedUrl(u.toString());
         this.host = domain.startsWith("www.") ? domain.substring(4) : domain;
         this.status = Status.Q;
@@ -101,6 +99,14 @@ public class Link {
         this.hash = hash;
     }
 
+    public int getPriority() {
+        return priority;
+    }
+
+    public void setPriority(int priority) {
+        this.priority = priority;
+    }
+
     public boolean isNews() {
         return isNews;
     }
@@ -132,6 +138,7 @@ public class Link {
                 ", depth=" + depth +
                 ", date=" + date +
                 ", hash='" + hash + '\'' +
+                ", priority=" + priority +
                 ", isNews=" + isNews +
                 '}';
     }

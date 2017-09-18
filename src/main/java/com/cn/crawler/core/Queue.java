@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
+import java.net.URISyntaxException;
 import java.util.*;
 
 /**
@@ -24,9 +25,9 @@ public class Queue implements java.util.Queue<Link>{
 
     private final String host;
     private final Data data;
-    private LinkedHashSet<Link> visited = new LinkedHashSet<>();
-    private LinkedHashSet<Link> error = new LinkedHashSet<>();
-    private LinkedHashSet<Link> queue = new LinkedHashSet<>();
+    private UniquePriorityQueue visited = new UniquePriorityQueue();
+    private UniquePriorityQueue error = new UniquePriorityQueue();
+    private UniquePriorityQueue queue = new UniquePriorityQueue();
     private List<Link> changes = new ArrayList<>();
     private final AbstractExploreRule rule;
     private static final int BATCH_MAX = 1000;
@@ -48,6 +49,10 @@ public class Queue implements java.util.Queue<Link>{
 
     public int getVisitedSize(){
         return visited.size();
+    }
+
+    public int getErrorSize(){
+        return error.size();
     }
 
     @Override
@@ -132,45 +137,22 @@ public class Queue implements java.util.Queue<Link>{
 
     @Override
     public Link remove() {
-        Iterator<Link> it = iterator();
-        if(it.hasNext()){
-            Link link = it.next();
-            queue.remove(link);
-            return link;
-        }
-        throw new NoSuchElementException();
+        return queue.remove();
     }
 
     @Override
     public Link poll() {
-        try {
-            return remove();
-        }catch (NoSuchElementException ex){
-
-        }
-        return null;
+        return queue.poll();
     }
 
     @Override
     public Link element() {
-        Iterator<Link> it = iterator();
-        if(it.hasNext()){
-            Link link = it.next();
-            queue.remove(link);
-            return link;
-        }
-        throw new NoSuchElementException();
+        return queue.element();
     }
 
     @Override
     public Link peek() {
-        Iterator<Link> it = iterator();
-        if(it.hasNext()){
-            Link link = it.next();
-            queue.remove(link);
-            return link;
-        }
-        return null;
+        return queue.peek();
     }
 
     public boolean setVisited(Link link){
@@ -247,6 +229,8 @@ public class Queue implements java.util.Queue<Link>{
             e.printStackTrace();
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
         }
 
         queue.add(link);
@@ -278,6 +262,8 @@ public class Queue implements java.util.Queue<Link>{
                             queue.add(l);
                         } catch (MalformedURLException e) {
                             log.error(e.getMessage() + link);
+                        } catch (URISyntaxException e) {
+                            e.printStackTrace();
                         }
                     }
                 }

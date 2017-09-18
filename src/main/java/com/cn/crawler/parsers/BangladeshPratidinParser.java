@@ -20,8 +20,29 @@ public class BangladeshPratidinParser extends AbstractParser {
     }
 
     @Override
+    public int getPriority(Link link) {
+        if(getArticleId(link.getUrl()) > 0){
+            return 1;
+        }
+        return 0;
+    }
+
+    private int getArticleId(String url){
+        String articleId = url.substring(url.lastIndexOf("/")+1);
+        try{
+            return Integer.parseInt(articleId);
+        }catch (NumberFormatException ex){
+
+        }
+        return 0;
+    }
+
+    @Override
     protected boolean isParsable(Link link, Document doc) throws ParseException {
         String url = link.getUrl();
+        if(getArticleId(url) < 1){
+            return false;
+        }
         String articleId = url.substring(url.lastIndexOf("/")+1);
         try{
             Integer.parseInt(articleId);

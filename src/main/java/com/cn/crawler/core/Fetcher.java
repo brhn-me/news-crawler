@@ -17,6 +17,7 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.net.URISyntaxException;
 import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.regex.Matcher;
@@ -63,7 +64,7 @@ public class Fetcher implements Runnable {
 
     public Connection.Response fetch(Link link) throws IOException {
         String url = Utils.getEncodedUrl(link.getUrl());
-        log.info("Fetching: " + link.getUrl() + ", Queue : " + queue.size());
+        log.info("Fetching: " + link.getUrl() + ", Depth : "+ link.getDepth()+ ", Queue : " + queue.size()+", Visited : "+ queue.getVisitedSize() + ", Error : "+ queue.getErrorSize());
         Connection.Response response = Jsoup
                 .connect(url)
                 .userAgent("Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:25.0) Gecko/20100101 Firefox/25.0")
@@ -125,8 +126,11 @@ public class Fetcher implements Runnable {
                 if (!Utils.isNullOrEmpty(url) && isValidUrl(url)) {
                     try {
                         Link l = new Link(url, link.getDepth() + 1);
+                        l.setPriority(parser.getPriority(l));
                         queue.add(l);
                     } catch (MalformedURLException e) {
+                        log.error(e.getMessage() + link);
+                    } catch (URISyntaxException e) {
                         log.error(e.getMessage() + link);
                     }
                 }

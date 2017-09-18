@@ -20,6 +20,14 @@ public class BBCBanglaParser extends AbstractParser {
     }
 
     @Override
+    public int getPriority(Link link) {
+        if(link.getUrl().contains("/bengali/news-")){
+            return 1;
+        }
+        return 0;
+    }
+
+    @Override
     protected boolean isParsable(Link link, Document doc) throws ParseException {
         if (link.getUrl().contains("/bengali/news-") && doc.select(".story-body").size() > 0) {
             return true;

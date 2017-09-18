@@ -17,6 +17,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
+import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Scanner;
@@ -123,6 +124,8 @@ public class Crawler {
                         } catch (MalformedURLException e) {
                             e.printStackTrace();
                         } catch (UnsupportedEncodingException e) {
+                            e.printStackTrace();
+                        } catch (URISyntaxException e) {
                             e.printStackTrace();
                         }
                     }

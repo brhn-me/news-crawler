@@ -20,6 +20,14 @@ public class BanglaNews24Parser extends AbstractParser {
     }
 
     @Override
+    public int getPriority(Link link) {
+        if(link.getUrl().endsWith(".details")){
+            return 1;
+        }
+        return 0;
+    }
+
+    @Override
     protected boolean isParsable(Link link, Document doc) throws ParseException {
         if(link.getUrl().endsWith(".details")){
             return true;

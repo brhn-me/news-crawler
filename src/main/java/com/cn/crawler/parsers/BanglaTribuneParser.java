@@ -20,6 +20,14 @@ public class BanglaTribuneParser extends AbstractParser {
     }
 
     @Override
+    public int getPriority(Link link) {
+        if(link.getUrl().contains("/news/")){
+            return 1;
+        }
+        return 0;
+    }
+
+    @Override
     protected boolean isParsable(Link link, Document doc) throws ParseException {
         if (link.getUrl().contains("/news/") && doc.select(".detail_article article").size() > 0) {
             return true;

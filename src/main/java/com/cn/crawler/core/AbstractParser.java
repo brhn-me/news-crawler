@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
+import java.net.URISyntaxException;
 import java.net.URLDecoder;
 import java.security.NoSuchAlgorithmException;
 import java.util.Date;
@@ -29,6 +30,10 @@ public abstract class AbstractParser {
     protected abstract boolean isParsable(Link link, Document doc) throws ParseException;
 
     protected abstract News parseHandler(Link link, Document doc) throws ParseException;
+
+    public int getPriority(Link link){
+        return 0;
+    }
 
     public News parse(Link link, Document doc) throws ParseException {
         if (isParsable(link, doc)) {
@@ -62,6 +67,8 @@ public abstract class AbstractParser {
         } catch (MalformedURLException e) {
             e.printStackTrace();
         } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        } catch (URISyntaxException e) {
             e.printStackTrace();
         }
         System.out.println("Testing : " + link.getUrl());

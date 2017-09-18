@@ -20,6 +20,15 @@ public class IttefaqParser extends AbstractParser {
     }
 
     @Override
+    public int getPriority(Link link) {
+        if(link.getUrl().endsWith(".html")){
+            return 1;
+        } else {
+            return 0;
+        }
+    }
+
+    @Override
     protected boolean isParsable(Link link, Document doc) throws ParseException {
         if(link.getUrl().endsWith(".html") && doc.select(".detailsNews").size() > 0){
             return true;
