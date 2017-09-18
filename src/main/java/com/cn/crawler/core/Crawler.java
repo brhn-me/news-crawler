@@ -79,6 +79,9 @@ public class Crawler {
         parsers.put("dailynayadiganta.com", NayaDigantaParser.class);
         parsers.put("bonikbarta.net", BonikBartaParser.class);
         parsers.put("banglatribune.com", BanglaTribuneParser.class);
+        parsers.put("mzamin.com", ManabZaminParser.class);
+        parsers.put("bhorerkagoj.net", BhorerKagojParser.class);
+        parsers.put("dailyjanakantha.us", JanakanthaParser.class);
     }
 
     public void loadSeeds(String seedPath) {
