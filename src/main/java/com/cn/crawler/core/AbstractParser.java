@@ -38,7 +38,7 @@ public abstract class AbstractParser {
                 if (news != null) {
                     try {
                         news.setUrl(link.getUrl());
-                        news.setId(link.getHash());
+                        news.setId(link.getId());
                         news.setHash(Utils.hash(news.getContent()));
                         news.setHost(link.getHost());
                         news.setModified(new Date());

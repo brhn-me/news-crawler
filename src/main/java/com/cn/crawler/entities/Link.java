@@ -15,6 +15,7 @@ import java.util.Date;
  * Created by burhan on 5/30/17.
  */
 public class Link {
+    private String id;
     @Id
     private String url;
     private Status status;
@@ -37,11 +38,19 @@ public class Link {
         this.depth = depth;
         this.date = new Date();
         try {
-            this.hash = Utils.hash(this.url);
+            this.id = Utils.hash(this.url);
         } catch (NoSuchAlgorithmException e) {
             e.printStackTrace();
         }
 
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 
     public String getUrl() {
@@ -116,7 +125,8 @@ public class Link {
     @Override
     public String toString() {
         return "Link{" +
-                "url='" + url + '\'' +
+                "id='" + id + '\'' +
+                ", url='" + url + '\'' +
                 ", status=" + status +
                 ", host='" + host + '\'' +
                 ", depth=" + depth +
