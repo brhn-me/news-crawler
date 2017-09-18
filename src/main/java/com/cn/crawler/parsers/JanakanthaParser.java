@@ -57,7 +57,7 @@ public class JanakanthaParser extends AbstractParser {
         News news = new News();
         news.setTitle(title);
         news.setCategories(categories);
-        news.setContent(content.toString());
+        news.setContent(content.toString().trim());
         news.setImages(images);
 
         return news;
