@@ -64,7 +64,6 @@ public class Fetcher implements Runnable {
 
     public Connection.Response fetch(Link link) throws IOException {
         String url = Utils.getEncodedUrl(link.getUrl());
-        log.info("Fetching: " + link.getUrl() + ", Depth : "+ link.getDepth()+ ", Queue : " + queue.size()+", Visited : "+ queue.getVisitedSize() + ", Error : "+ queue.getErrorSize());
         Connection.Response response = Jsoup
                 .connect(url)
                 .userAgent("Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:25.0) Gecko/20100101 Firefox/25.0")
@@ -89,6 +88,9 @@ public class Fetcher implements Runnable {
     }
 
     public void explore(Link link) throws IOException {
+        String nfo = "\r\n" +
+                    "Exploring : " + link.getUrl() +"\r\n"
+                +   "    - Fetching...\r\n";
         Connection.Response response = fetch(link);
         if (!isValidResposeType(response.contentType())) {
             return;
@@ -110,15 +112,17 @@ public class Fetcher implements Runnable {
             log.error("Failed to calculate hash for link : " + link);
         }
         try {
+            nfo += "    - Parsing...\r\n";
             News news = parser.parse(link, doc);
             if (news != null) {
+                nfo += "    - Saving...\r\n";
                 save(link, news);
                 link.setNews(true);
-                log.info("Found article on : " + link.getUrl() + ", Queue : " + queue.size());
             }
         } catch (ParseException e) {
             log.error("Failed to parse link : " + link);
         }
+        int n = 0;
         if (link.getDepth() < maxDepth) {
             Elements linkElements = doc.select("a[href]");
             for (Element linkElement : linkElements) {
@@ -127,7 +131,9 @@ public class Fetcher implements Runnable {
                     try {
                         Link l = new Link(url, link.getDepth() + 1);
                         l.setPriority(parser.getPriority(l));
-                        queue.add(l);
+                        if(queue.add(l)){
+                            n++;
+                        }
                     } catch (MalformedURLException e) {
                         log.error(e.getMessage() + link);
                     } catch (URISyntaxException e) {
@@ -135,7 +141,11 @@ public class Fetcher implements Runnable {
                     }
                 }
             }
+            nfo += "    - Links : "+n + "\r\n";
+            nfo += "    - Depth : "+link.getDepth() + "\r\n";
+            nfo += "    - Queue : "+queue.toString() + "\r\n";
         }
+        log.info(nfo);
     }
 
     private void save(Link link, News news) {
