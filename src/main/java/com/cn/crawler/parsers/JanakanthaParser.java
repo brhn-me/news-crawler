@@ -43,7 +43,10 @@ public class JanakanthaParser extends AbstractParser {
 
 
         Set<String> images = new HashSet<>();
-        images.add(doc.select(".details-article > img.smp-w100p").first().attr("abs:src"));
+        Elements els = doc.select(".details-article > img.smp-w100p");
+        if(els.size()> 0) {
+            images.add(els.first().attr("abs:src"));
+        }
 
         Elements paras = doc.select(".details-article > p");
         StringBuilder content = new StringBuilder();
