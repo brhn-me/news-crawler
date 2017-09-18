@@ -35,7 +35,7 @@ public class Crawler {
     private Set<Link> seeds = new HashSet<>();
     private HashMap<String, Agent> agents = new HashMap<>();
     private HashMap<String, Class> parsers = new HashMap<>();
-    ExecutorService executor = Executors.newFixedThreadPool(50);
+    ExecutorService executor;
 
 
     public Crawler() {
@@ -43,6 +43,8 @@ public class Crawler {
     }
 
     public void boostrap(Params params){
+        executor = Executors.newFixedThreadPool(config.getFetcher().getPool());
+
         this.setParams(params);
         this.loadSeeds(params.getSeedPath());
         this.registerParsers();
@@ -74,6 +76,9 @@ public class Crawler {
         parsers.put("banglanews24.com", BanglaNews24Parser.class);
         parsers.put("ittefaq.com.bd", IttefaqParser.class);
         parsers.put("bd-pratidin.com", BangladeshPratidinParser.class);
+        parsers.put("dailynayadiganta.com", NayaDigantaParser.class);
+        parsers.put("bonikbarta.net", BonikBartaParser.class);
+        parsers.put("banglatribune.com", BanglaTribuneParser.class);
     }
 
     public void loadSeeds(String seedPath) {
@@ -115,38 +120,38 @@ public class Crawler {
     public void createAgents() {
         log.info("Creating agents...");
         for (Link link : this.seeds) {
-            String domain = link.getDomain();
+            String host = link.getHost();
 
-            if(!parsers.containsKey(domain)){
-                log.error("Parser not found for domain '"+ domain + "'. Seed url '"+ link.getUrl() + "' would be ignored");
+            if(!parsers.containsKey(host)){
+                log.error("Parser not found for host '"+ host + "'. Seed url '"+ link.getUrl() + "' would be ignored");
                 continue;
             }
-            Class type = parsers.get(domain);
+            Class type = parsers.get(host);
             AbstractParser parser = null;
             try {
                 parser = (AbstractParser) type.newInstance();
             } catch (InstantiationException ex){
-                log.error("Failed to instantiate parser for domain : "+ domain + ". Seed url '"+ link.getUrl() + "' would be ignored");
+                log.error("Failed to instantiate parser for host : "+ host + ". Seed url '"+ link.getUrl() + "' would be ignored");
                 continue;
             } catch (IllegalAccessException ex){
-                log.error("Failed to instantiate parser for domain : "+ domain + ". Seed url '"+ link.getUrl() + "' would be ignored");
+                log.error("Failed to instantiate parser for host : "+ host + ". Seed url '"+ link.getUrl() + "' would be ignored");
                 continue;
             }
 
             if(parser == null){
-                log.error("Parser not found for domain : "+ domain + ". Seed url '"+ link.getUrl() + "' would be ignored");
+                log.error("Parser not found for host : "+ host + ". Seed url '"+ link.getUrl() + "' would be ignored");
                 continue;
             }
 
-            if (!agents.containsKey(domain)) {
-                Queue q = new Queue(data, domain);
+            if (!agents.containsKey(host)) {
+                Queue q = new Queue(data, host);
                 q.add(link);
                 q.loadState(params.getUpdateLinks());
 
                 Agent agent = new Agent(this, q, parser);
-                agents.put(domain, agent);
+                agents.put(host, agent);
             } else {
-                Agent agent = agents.get(domain);
+                Agent agent = agents.get(host);
                 agent.getQueue().add(link);
             }
         }

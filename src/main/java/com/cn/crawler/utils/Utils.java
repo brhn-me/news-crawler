@@ -125,33 +125,34 @@ public class Utils {
     }
 
 
-    public static String getEncodedUrl(String str){
-        try {
-            URL url = new URL(str);
-            String protocol = url.getProtocol();
-            int port = url.getPort();
-            String host = url.getHost();
-            String path = url.getPath();
-            String query = url.getQuery();
+    public static String getEncodedUrl(String str) throws MalformedURLException, UnsupportedEncodingException {
+        URL url = new URL(str);
+        String protocol = url.getProtocol();
+        int port = url.getPort();
+        String host = url.getHost();
+        String path = url.getPath();
+        String query = url.getQuery();
 
-            String r = protocol + "://" + host;
-            if(port != -1){
-                r += ":"+port;
-            }
-            path = URLEncoder.encode(path, "UTF-8").replace("%2F", "/");
-            if(!Utils.isNullOrEmpty(path)){
-                r += path;
-            }
-            if(!Utils.isNullOrEmpty(query)){
-                query = getEncodedQueryString(url);
-                r += query;
-            }
-            return r;
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
+        String r = protocol + "://" + host;
+        if(port != -1){
+            r += ":"+port;
         }
-        return null;
+        path = URLEncoder.encode(path, "UTF-8").replace("%2F", "/");
+        if(!Utils.isNullOrEmpty(path)){
+            r += path;
+        }
+        if(!Utils.isNullOrEmpty(query)){
+            query = getEncodedQueryString(url);
+            r += query;
+        }
+        return r;
+    }
+
+    public static String getDecodedUrl(String url) throws UnsupportedEncodingException {
+        return URLDecoder.decode(url, "UTF-8");
+    }
+
+    public static String hash(String str) throws NoSuchAlgorithmException {
+        return md5(str);
     }
 }

@@ -15,6 +15,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URLDecoder;
 import java.security.NoSuchAlgorithmException;
+import java.util.Date;
 
 /**
  * Created by burhan on 5/19/17.
@@ -36,11 +37,11 @@ public abstract class AbstractParser {
                 News news = parseHandler(link, doc);
                 if (news != null) {
                     try {
-                        //String url = link.getUrl();
-                        String url = URLDecoder.decode( link.getUrl(), "UTF-8" );
-                        news.setUrl(url);
-                        news.setId(Utils.md5(news.getUrl()));
-                        news.setHash(Utils.md5(news.getContent()));
+                        news.setUrl(link.getUrl());
+                        news.setId(link.getHash());
+                        news.setHash(Utils.hash(news.getContent()));
+                        news.setHost(link.getHost());
+                        news.setModified(new Date());
                     } catch (NoSuchAlgorithmException e) {
                         throw new ParseException("Failed to generate (id, hash) from (url, content) for link : " + link
                                 .toString(), e);
@@ -68,7 +69,7 @@ public abstract class AbstractParser {
             url = Utils.getEncodedUrl(url);
             Connection.Response response = Jsoup
                     .connect(url)
-                    .userAgent("Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:25.0) Gecko/20100101 Firefox/25.0")
+                    .userAgent("Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/535.21 (KHTML, like Gecko) Chrome/19.0.1042.0 Safari/535.21")
                     .referrer("http://www.google.com")
                     .timeout(60 * 1000)
                     .execute();
@@ -102,6 +103,8 @@ public abstract class AbstractParser {
         //test("http://www.samakal.com/technology/article/1709703/এলো-আইফোন-এক্স", SamakalParser.class);
         //test("http://www.ittefaq.com.bd/wholecountry/2017/09/16/127562.html", IttefaqParser.class);
         //test("http://www.bd-pratidin.com/tech-world/2017/09/16/264490", BangladeshPratidinParser.class);
-        test("http://bonikbarta.net/bangla/news/2017-09-16/131358/%E0%A6%AE%E0%A7%81%E0%A6%B6%E0%A6%AB%E0%A6%BF%E0%A6%95%E0%A7%87%E0%A6%B0-%E0%A6%85%E0%A6%A8%E0%A7%81%E0%A6%B0%E0%A7%8B%E0%A6%A7", BonikBartaParser.class);
+        //test("http://bonikbarta.net/bangla/news/2017-09-18/131580/%E0%A6%96%E0%A6%BE%E0%A6%A6%E0%A7%8D%E0%A6%AF-%E0%A6%B8%E0%A6%82%E0%A6%95%E0%A6%9F%E0%A7%87-%E0%A6%AA%E0%A7%9C%E0%A6%A4%E0%A7%87-%E0%A6%AA%E0%A6%BE%E0%A6%B0%E0%A7%87-%E0%A6%B6%E0%A6%B0%E0%A6%A3%E0%A6%BE%E0%A6%B0%E0%A7%8D%E0%A6%A5%E0%A7%80%E0%A6%B0%E0%A6%BE%E2%80%94%E0%A6%B8%E0%A7%87%E0%A6%AD-%E0%A6%A6%E0%A7%8D%E0%A6%AF-%E0%A6%9A%E0%A6%BF%E0%A6%B2%E0%A6%A1%E0%A7%8D%E0%A6%B0%E0%A7%87%E0%A6%A8/", BonikBartaParser.class);
+        //test("http://www.dailynayadiganta.com/detail/news/244339", NayaDigantaParser.class);
+        test("http://www.banglatribune.com/sport/news/217209/%E0%A6%B9%E0%A6%95%E0%A6%BF%E0%A6%B0-%E0%A6%B8%E0%A6%BE%E0%A6%AB%E0%A6%B2%E0%A7%8D%E0%A6%AF%E0%A7%87-%E0%A6%95%E0%A7%8D%E0%A6%B0%E0%A6%BF%E0%A6%95%E0%A7%87%E0%A6%9F%E0%A7%87%E0%A6%B0-%E0%A6%AC%E0%A7%8D%E0%A6%AF%E0%A6%B0%E0%A7%8D%E0%A6%A5%E0%A6%A4%E0%A6%BE-%E0%A6%AD%E0%A7%81%E0%A6%B2%E0%A6%9B%E0%A7%87-%E0%A6%AD%E0%A6%BE%E0%A6%B0%E0%A6%A4", BanglaTribuneParser.class);
     }
 }

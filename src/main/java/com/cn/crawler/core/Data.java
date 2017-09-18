@@ -24,7 +24,7 @@ public class Data {
     }
 
     public List<Link> getLinksByDomain(String domain){
-        return linkRepository.findAllByDomain(domain);
+        return linkRepository.findAllByHost(domain);
     }
 
     public void saveLinks(List<Link> links){

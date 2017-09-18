@@ -1,12 +1,14 @@
 package com.cn.crawler.entities;
 
 import com.cn.crawler.core.Status;
+import com.cn.crawler.utils.Utils;
 import org.springframework.data.annotation.Id;
 
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.time.ZonedDateTime;
+import java.net.URLDecoder;
+import java.security.NoSuchAlgorithmException;
 import java.util.Date;
 
 /**
@@ -16,22 +18,30 @@ public class Link {
     @Id
     private String url;
     private Status status;
-    private String domain;
+    private String host;
     private int depth;
     private Date date;
     private String hash;
+    private boolean isNews = false;
 
     public Link() {
     }
 
     public Link(String url, int depth) throws MalformedURLException, UnsupportedEncodingException {
         URL u = new URL(url);
-        this.url = u.toString();
         String domain = u.getHost();
-        this.domain = domain.startsWith("www.") ? domain.substring(4) : domain;
+
+        this.url = Utils.getDecodedUrl(u.toString());
+        this.host = domain.startsWith("www.") ? domain.substring(4) : domain;
         this.status = Status.Q;
         this.depth = depth;
         this.date = new Date();
+        try {
+            this.hash = Utils.hash(this.url);
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        }
+
     }
 
     public String getUrl() {
@@ -50,12 +60,12 @@ public class Link {
         this.status = status;
     }
 
-    public String getDomain() {
-        return domain;
+    public String getHost() {
+        return host;
     }
 
-    public void setDomain(String domain) {
-        this.domain = domain;
+    public void setHost(String host) {
+        this.host = host;
     }
 
     public int getDepth() {
@@ -82,6 +92,14 @@ public class Link {
         this.hash = hash;
     }
 
+    public boolean isNews() {
+        return isNews;
+    }
+
+    public void setNews(boolean news) {
+        isNews = news;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -100,10 +118,11 @@ public class Link {
         return "Link{" +
                 "url='" + url + '\'' +
                 ", status=" + status +
-                ", domain='" + domain + '\'' +
+                ", host='" + host + '\'' +
                 ", depth=" + depth +
                 ", date=" + date +
                 ", hash='" + hash + '\'' +
+                ", isNews=" + isNews +
                 '}';
     }
 }

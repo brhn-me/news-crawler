@@ -9,5 +9,5 @@ import java.util.List;
  * Created by burhan on 9/13/17.
  */
 public interface LinkRepository extends MongoRepository<Link, String> {
-    public List<Link> findAllByDomain(String domain);
+    public List<Link> findAllByHost(String host);
 }

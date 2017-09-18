@@ -1,7 +1,6 @@
 package com.cn.crawler.core;
 
 import com.cn.crawler.entities.Link;
-import com.cn.crawler.entities.News;
 import com.cn.crawler.utils.Utils;
 import org.jsoup.Connection;
 import org.jsoup.Jsoup;
@@ -14,7 +13,6 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
-import java.time.ZonedDateTime;
 import java.util.*;
 
 /**
@@ -23,7 +21,7 @@ import java.util.*;
 public class Queue implements java.util.Queue<Link>{
     private static final Logger log = LoggerFactory.getLogger(Queue.class);
 
-    private final String domain;
+    private final String host;
     private final Data data;
     private LinkedHashSet<Link> visited = new LinkedHashSet<>();
     private LinkedHashSet<Link> error = new LinkedHashSet<>();
@@ -31,13 +29,13 @@ public class Queue implements java.util.Queue<Link>{
     private List<Link> changes = new ArrayList<>();
     private static final int BATCH_MAX = 1000;
 
-    public Queue(Data data, String domain) {
+    public Queue(Data data, String host) {
         this.data = data;
-        this.domain = domain;
+        this.host = host;
     }
 
-    public String getDomain() {
-        return domain;
+    public String getHost() {
+        return host;
     }
 
     @Override
@@ -80,7 +78,7 @@ public class Queue implements java.util.Queue<Link>{
 
     @Override
     public boolean add(Link link) {
-        if(!domain.equalsIgnoreCase(link.getDomain()) || queue.contains(link) || visited.contains(link) || error.contains(link)){
+        if(!host.equalsIgnoreCase(link.getHost()) || queue.contains(link) || visited.contains(link) || error.contains(link)){
             return false;
         }
         trackChanges(link);
@@ -183,14 +181,14 @@ public class Queue implements java.util.Queue<Link>{
     private void trackChanges(Link link){
         changes.add(link);
         if(changes.size() >= BATCH_MAX){
-            log.info("Saving current state for queue : " + domain);
+            log.info("Saving current state for queue : " + host);
             data.saveLinks(changes);
             changes.clear();
         }
     }
 
     public void loadState(final boolean update){
-        List<Link> links = data.getLinksByDomain(domain);
+        List<Link> links = data.getLinksByDomain(host);
         if(update) {
             queue.addAll(links);
         } else {
@@ -214,13 +212,13 @@ public class Queue implements java.util.Queue<Link>{
         all.addAll(visited);
         all.addAll(error);
         data.saveLinks(new ArrayList<>(all));
-        log.info("Saved state for : " + domain+", " +this.toString());
+        log.info("Saved state for : " + host +", " +this.toString());
     }
 
     @Override
     public String toString() {
         return "Queue{" +
-                "domain='" + domain + '\'' +
+                "host='" + host + '\'' +
                 ", visited=" + visited.size() +
                 ", error=" + error.size() +
                 ", queue=" + queue.size() +

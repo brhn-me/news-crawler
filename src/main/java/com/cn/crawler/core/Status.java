@@ -6,5 +6,5 @@ package com.cn.crawler.core;
 public enum Status {
     Q, // queued
     V, // VISITED
-    E
+    E, // ERROR
 }

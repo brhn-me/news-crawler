@@ -1,6 +1,7 @@
 package com.cn.crawler.entities;
 
 import java.io.Serializable;
+import java.util.Date;
 import java.util.Set;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -18,6 +19,8 @@ public class News implements Serializable {
     private String hash;
     private Set<String> categories;
     private Set<String> images;
+    private String host;
+    private Date modified;
 
     public String getId() {
         return id;
@@ -83,6 +86,22 @@ public class News implements Serializable {
         this.images = images;
     }
 
+    public String getHost() {
+        return host;
+    }
+
+    public void setHost(String host) {
+        this.host = host;
+    }
+
+    public Date getModified() {
+        return modified;
+    }
+
+    public void setModified(Date modified) {
+        this.modified = modified;
+    }
+
     @Override
     public String toString() {
         return "News{" +
@@ -94,6 +113,8 @@ public class News implements Serializable {
                 ", hash='" + hash + '\'' +
                 ", categories=" + categories +
                 ", images=" + images +
+                ", host='" + host + '\'' +
+                ", modified=" + modified +
                 '}';
     }
 }

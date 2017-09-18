@@ -61,7 +61,7 @@ public class Fetcher implements Runnable {
 
     public Connection.Response fetch(Link link) throws IOException {
         String url = Utils.getEncodedUrl(link.getUrl());
-        log.info("Fetching: " + link.getUrl() + ", Queue : " + queue.size());
+        //log.info("Fetching: " + link.getUrl() + ", Queue : " + queue.size());
         Connection.Response response = Jsoup
                 .connect(url)
                 .userAgent("Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:25.0) Gecko/20100101 Firefox/25.0")
@@ -93,10 +93,10 @@ public class Fetcher implements Runnable {
         Document doc = response.parse();
         // calculate hash for link
         try {
-            String hash = Utils.md5(doc.outerHtml());
+            String hash = Utils.hash(doc.outerHtml());
 
             if (link.getStatus() == Status.V) {
-                if (hash.equals(link.getStatus())) {
+                if (hash.equals(link.getHash())) {
                     // content has not changed yet
                     log.info("No change on url : " + link.getUrl());
                     return;
@@ -110,6 +110,8 @@ public class Fetcher implements Runnable {
             News news = parser.parse(link, doc);
             if (news != null) {
                 save(link, news);
+                link.setNews(true);
+                log.info("Saved news from: " + link.getUrl() + ", Queue : " + queue.size());
             }
         } catch (ParseException e) {
             log.error("Failed to parse link : " + link);
@@ -143,7 +145,7 @@ public class Fetcher implements Runnable {
     }
 
     private void save2File(Link link, News news) throws IOException {
-        String path = crawlPath.getAbsolutePath() + File.separator + link.getDomain() + File.separator + news.getId();
+        String path = crawlPath.getAbsolutePath() + File.separator + link.getHost() + File.separator + news.getId();
         String json = gson.toJson(news);
         Utils.save2File(path, json);
     }
@@ -170,7 +172,7 @@ public class Fetcher implements Runnable {
                 e.printStackTrace();
             }
             if (queue.size() < 1) {
-                System.out.println("Fetcher shutting down on : " + queue.getDomain());
+                System.out.println("Fetcher shutting down on : " + queue.getHost());
                 break;
             }
         }

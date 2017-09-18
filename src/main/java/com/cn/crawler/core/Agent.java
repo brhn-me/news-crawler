@@ -26,7 +26,7 @@ public class Agent {
     }
 
     public void start(ExecutorService executor) {
-        log.info("Running agent on: " + queue.getDomain());
+        log.info("Running agent on: " + queue.getHost());
         for (int i = 0; i < numberOfFetchers; i++) {
             Fetcher fetcher = new Fetcher(crawler, this, queue);
             fetchers.add(fetcher);

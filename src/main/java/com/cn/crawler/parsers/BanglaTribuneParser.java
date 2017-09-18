@@ -15,30 +15,40 @@ import java.util.Set;
 /**
  * Created by burhan on 5/19/17.
  */
-public class BonikBartaParser extends AbstractParser {
-    public BonikBartaParser() {
+public class BanglaTribuneParser extends AbstractParser {
+    public BanglaTribuneParser() {
     }
 
     @Override
     protected boolean isParsable(Link link, Document doc) throws ParseException {
-        if (link.getUrl().contains("http://bonikbarta.net/bangla/news")) {
+        if (link.getUrl().contains("/news/") && doc.select(".detail_article article").size() > 0) {
             return true;
         }
         return false;
     }
 
     public News parseHandler(Link link, Document doc) throws NullPointerException {
-        Elements dateEl = doc.select(".news .news-heading p.meta span.date-pub");
-        String date = dateEl.select("date").text() + dateEl.select("time").text();
-
-        String title = doc.select(".news h1.heading").text();
-        String content = Utils.br2nl(doc.select("article .news .content").html());
+        String date = doc.select(".detail_article .time_info .time").first().attr("data-published");
+        String title = doc.select(".detail_article h2.title_holder span.title").text();
+        String content = Utils.br2nl(doc.select(".detail_article article").html());
 
         Set<String> categories = new HashSet<>();
-        categories.add(doc.select(".news .cats-of p.cat-name").text());
+        Elements categoryElements = doc.select(".breadcrumb li");
+        boolean first = true;
+        for(Element li : categoryElements){
+            if(first){
+                first = false;
+                continue;
+            }
+            String cat = li.text();
+            if(cat != null || "".equals(cat)){
+                cat = cat.trim();
+                categories.add(cat);
+            }
+        }
 
         Set<String> images = new HashSet<>();
-        Elements elements = doc.select(".news .content .thumbs img");
+        Elements elements = doc.select(".detail_article article img");
         for (Element img : elements) {
             images.add(img.attr("abs:src"));
         }
