@@ -28,8 +28,8 @@ public class BBCBanglaParser extends AbstractParser {
     }
 
     public News parseHandler(Link link, Document doc) throws NullPointerException {
-        String date = doc.select(".story-body .date.date--v2").first().attr("data-datetime");
-        String title = doc.select(".story-body .story-body__h1").text();
+        String date = doc.select(".date.date--v2").first().attr("data-datetime");
+        String title = doc.select(".story-body__h1").text();
         Set<String> categories = new HashSet<>();
         Elements categoryElements = doc.select(".tags-container .tags-list li a");
         for(Element li : categoryElements){

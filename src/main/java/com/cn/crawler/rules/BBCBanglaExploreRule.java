@@ -12,8 +12,7 @@ public class BBCBanglaExploreRule extends AbstractExploreRule {
     @Override
     boolean ruleHandler(Link link) throws MalformedURLException {
         URL url = new URL(link.getUrl());
-        System.out.println(url.getPath());
-        if(url.getPath().startsWith("bengali")){
+        if(url.getPath().startsWith("/bengali")){
             return true;
         }
         return false;

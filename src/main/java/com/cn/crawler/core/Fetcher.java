@@ -63,7 +63,7 @@ public class Fetcher implements Runnable {
 
     public Connection.Response fetch(Link link) throws IOException {
         String url = Utils.getEncodedUrl(link.getUrl());
-        //log.info("Fetching: " + link.getUrl() + ", Queue : " + queue.size());
+        log.info("Fetching: " + link.getUrl() + ", Queue : " + queue.size());
         Connection.Response response = Jsoup
                 .connect(url)
                 .userAgent("Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:25.0) Gecko/20100101 Firefox/25.0")
@@ -113,7 +113,7 @@ public class Fetcher implements Runnable {
             if (news != null) {
                 save(link, news);
                 link.setNews(true);
-                log.info("Saved news from: " + link.getUrl() + ", Queue : " + queue.size());
+                log.info("Found article on : " + link.getUrl() + ", Queue : " + queue.size());
             }
         } catch (ParseException e) {
             log.error("Failed to parse link : " + link);
@@ -155,9 +155,11 @@ public class Fetcher implements Runnable {
 
     @Override
     public void run() {
+        log.info("Running fetcher on : " + queue.getHost());
         while (true) {
             Link link = getNextUrl();
-            if (link == null) {
+            if (link == null && queue.size() < 1) {
+                log.info("Queue empty. Fetcher shutting down on : " + queue.getHost());
                 break;
             }
             try {
@@ -173,10 +175,7 @@ public class Fetcher implements Runnable {
                 log.error(link + e.getMessage());
                 e.printStackTrace();
             }
-            if (queue.size() < 1) {
-                System.out.println("Fetcher shutting down on : " + queue.getHost());
-                break;
-            }
+
         }
     }
 
