@@ -1,6 +1,7 @@
 package com.cn.crawler.core;
 
 import com.cn.crawler.entities.Link;
+import com.cn.crawler.rules.AbstractExploreRule;
 import com.cn.crawler.utils.Utils;
 import org.jsoup.Connection;
 import org.jsoup.Jsoup;
@@ -27,11 +28,13 @@ public class Queue implements java.util.Queue<Link>{
     private LinkedHashSet<Link> error = new LinkedHashSet<>();
     private LinkedHashSet<Link> queue = new LinkedHashSet<>();
     private List<Link> changes = new ArrayList<>();
+    private final AbstractExploreRule rule;
     private static final int BATCH_MAX = 1000;
 
-    public Queue(Data data, String host) {
+    public Queue(Data data, String host, AbstractExploreRule rule) {
         this.data = data;
         this.host = host;
+        this.rule = rule;
     }
 
     public String getHost() {
@@ -78,7 +81,13 @@ public class Queue implements java.util.Queue<Link>{
 
     @Override
     public boolean add(Link link) {
-        if(!host.equalsIgnoreCase(link.getHost()) || queue.contains(link) || visited.contains(link) || error.contains(link)){
+        if(!host.equalsIgnoreCase(link.getHost())){
+            return false;
+        }
+        if(rule != null && !rule.isExplorable(link)){
+            return false;
+        }
+        if(queue.contains(link) || visited.contains(link) || error.contains(link)){
             return false;
         }
         trackChanges(link);

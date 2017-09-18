@@ -3,6 +3,7 @@ package com.cn.crawler.core;
 
 import com.cn.crawler.entities.Link;
 import com.cn.crawler.entities.News;
+import com.cn.crawler.rules.AbstractExploreRule;
 import com.cn.crawler.utils.Utils;
 import com.google.gson.Gson;
 import org.jsoup.Connection;
@@ -17,6 +18,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.security.NoSuchAlgorithmException;
+import java.util.HashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 

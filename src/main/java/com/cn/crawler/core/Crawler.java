@@ -3,8 +3,11 @@ package com.cn.crawler.core;
 import com.cn.crawler.Params;
 import com.cn.crawler.entities.Link;
 import com.cn.crawler.parsers.*;
+import com.cn.crawler.rules.AbstractExploreRule;
+import com.cn.crawler.rules.BBCBanglaExploreRule;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.mongodb.core.aggregation.ArithmeticOperators;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PreDestroy;
@@ -35,7 +38,8 @@ public class Crawler {
     private Set<Link> seeds = new HashSet<>();
     private HashMap<String, Agent> agents = new HashMap<>();
     private HashMap<String, Class> parsers = new HashMap<>();
-    ExecutorService executor;
+    private HashMap<String, Class> rules = new HashMap<>();
+    ExecutorService executor = Executors.newFixedThreadPool(100);
 
 
     public Crawler() {
@@ -43,11 +47,10 @@ public class Crawler {
     }
 
     public void boostrap(Params params){
-        executor = Executors.newFixedThreadPool(config.getFetcher().getPool());
-
         this.setParams(params);
         this.loadSeeds(params.getSeedPath());
         this.registerParsers();
+        this.registerRules();
         this.createAgents();
         this.start();
     }
@@ -82,6 +85,13 @@ public class Crawler {
         parsers.put("mzamin.com", ManabZaminParser.class);
         parsers.put("bhorerkagoj.net", BhorerKagojParser.class);
         parsers.put("dailyjanakantha.us", JanakanthaParser.class);
+        parsers.put("jugantor.com", JugantarParser.class);
+        parsers.put("anandabazar.com", AnandaBazarParser.class);
+        parsers.put("bbc.com", BBCBanglaParser.class);
+    }
+
+    public void registerRules(){
+        rules.put("bbc.com", BBCBanglaExploreRule.class);
     }
 
     public void loadSeeds(String seedPath) {
@@ -147,7 +157,19 @@ public class Crawler {
             }
 
             if (!agents.containsKey(host)) {
-                Queue q = new Queue(data, host);
+                Class ruleClass = rules.get(host);
+                AbstractExploreRule rule = null;
+                if(ruleClass!= null){
+                    try {
+                        rule = (AbstractExploreRule) ruleClass.newInstance();
+                        log.info("Custom rules instantiated for : "+host);
+                    } catch (InstantiationException e) {
+                        e.printStackTrace();
+                    } catch (IllegalAccessException e) {
+                        e.printStackTrace();
+                    }
+                }
+                Queue q = new Queue(data, host, rule);
                 q.add(link);
                 q.loadState(params.getUpdateLinks());
 
