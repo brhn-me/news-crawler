@@ -165,7 +165,7 @@ public class Fetcher implements Runnable {
     @Override
     public void run() {
         log.info("Running fetcher on : " + queue.getHost());
-        while (true) {
+        while (!crawler.isShuttingDown()) {
             Link link = getNextUrl();
             if (link == null && queue.size() < 1) {
                 log.info("Queue empty. Fetcher shutting down on : " + queue.getHost());
@@ -184,7 +184,6 @@ public class Fetcher implements Runnable {
                 log.error(link + e.getMessage());
                 e.printStackTrace();
             }
-
         }
     }
 

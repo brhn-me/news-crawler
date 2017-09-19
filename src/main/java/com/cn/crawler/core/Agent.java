@@ -24,6 +24,9 @@ public class Agent {
     }
 
     public void createFetcher(ExecutorService executor) {
+        if(crawler.isShuttingDown()){
+            return;
+        }
         Fetcher fetcher = new Fetcher(crawler, this, queue);
         fetchers.add(fetcher);
         executor.submit(fetcher);

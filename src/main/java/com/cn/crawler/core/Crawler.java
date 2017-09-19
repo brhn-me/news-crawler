@@ -43,6 +43,7 @@ public class Crawler {
     private HashMap<String, Class> parsers = new HashMap<>();
     private HashMap<String, Class> rules = new HashMap<>();
     ExecutorService executor = Executors.newFixedThreadPool(100);
+    private boolean shuttingDown = false;
 
 
     public Crawler() {
@@ -208,13 +209,20 @@ public class Crawler {
         executor.shutdown();
     }
 
+    public boolean isShuttingDown() {
+        return shuttingDown;
+    }
+
     public void shutdown() {
         log.info("Shutting down crawler...");
+        shuttingDown = true;
         for (String domain : agents.keySet()) {
             Agent agent = agents.get(domain);
             agent.saveState();
         }
     }
+
+
 
 
     @PreDestroy
