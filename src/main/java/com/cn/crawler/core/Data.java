@@ -39,52 +39,37 @@ public class Data {
     }
 
 
-    public void migrate() {
+    public void migrate(HashMap<String, Class> parsers) {
         log.info("Running migration...");
         log.info("    - Loading links...");
         List<Link> links = linkRepository.findAll();
-        log.info("    - Loading newses...");
-        List<News> newses = newsRepository.findAll();
-        HashMap<String, News> map = new HashMap<>();
-        for (News news : newses) {
-            map.put(news.getId(), news);
-        }
+//        log.info("    - Loading newses...");
+//        List<News> newses = newsRepository.findAll();
+//        HashMap<String, News> map = new HashMap<>();
+//        for (News news : newses) {
+//            map.put(news.getId(), news);
+//        }
 
         for (Link link : links) {
+            Class type = parsers.get(link.getHost());
+            AbstractParser parser = null;
             try {
-                AbstractParser parser = null;
-                if ("anandabazar.com".equals(link.getHost())) {
-                    parser = new AnandaBazarParser();
-                }
-                Link newLink = Utils.createLink(link.getUrl(), link.getDepth(), parser);
-
-                if(newLink != null) {
-                    log.info("    - Processing : " + link.getUrl() + " --> " + newLink.getUrl());
-                    News news = map.get(link.getId());
-                    if (news != null) {
-                        news.setId(newLink.getId());
-                        news.setUrl(newLink.getUrl());
-                        newsRepository.save(news);
-                    }
-                    if (link.getStatus() == Status.V) {
-                        newLink.setStatus(Status.V);
-                    }
-
-                    newLink.setPriority(link.getPriority());
-                    newLink.setNews(link.isNews());
-
-                    if (!link.getId().equals(newLink.getId())) {
-                        linkRepository.delete(link);
-                    }
-                    linkRepository.save(newLink);
-                } else {
-                    log.error("Failed link : " + link.toString());
-                }
-            } catch (InvalidLinkException e) {
-                e.printStackTrace();
+                parser = (AbstractParser) type.newInstance();
+            } catch (InstantiationException ex) {
+                log.error("Failed to instantiate parser for host : " + link.getHost());
+                continue;
+            } catch (IllegalAccessException ex) {
+                log.error("Failed to instantiate parser for host : " + link.getHost());
+                continue;
             }
+            int priority = Math.abs(Fetcher.MAX_DEPTH - link.getDepth()) * Fetcher.DEPTH_WEIGHT;
+            if(parser != null){
+                priority += parser.getPriority(link);
+            }
+            log.info("Calculated depth : " + priority + " --> " + link.toString());
+            linkRepository.save(link);
         }
-        log.info("    - Saving...");
+        linkRepository.save(links);
 
         log.info("Migration complete...");
     }

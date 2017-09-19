@@ -50,11 +50,11 @@ public class Crawler {
     }
 
     public void boostrap(Params params) {
-        //data.migrate();
         this.setParams(params);
-        this.loadSeeds(params.getSeedPath());
         this.registerParsers();
         this.registerRules();
+        //data.migrate(parsers);
+        this.loadSeeds(params.getSeedPath());
         this.createAgents();
         this.start();
     }
@@ -123,6 +123,7 @@ public class Crawler {
                         Link link = null;
                         try {
                             link = Utils.createLink(url, 0);
+                            link.setPriority(10000);
                             links.add(link);
                         } catch (InvalidLinkException e) {
                             log.error(e.getMessage());

@@ -28,6 +28,8 @@ import java.util.regex.Pattern;
  */
 public class Fetcher implements Runnable {
     private static final Logger log = LoggerFactory.getLogger(Fetcher.class);
+    public static int MAX_DEPTH = 100;
+    public static int DEPTH_WEIGHT = 10;
 
     private final Crawler crawler;
     private final Agent agent;
@@ -121,7 +123,8 @@ public class Fetcher implements Runnable {
                 try {
                     childLink = Utils.createLink(url, link.getDepth() + 1);
                     if(childLink != null) {
-                        int priority = parser.getPriority(childLink);
+                        // calculate priority
+                        int priority = Math.abs(MAX_DEPTH - childLink.getDepth()) * DEPTH_WEIGHT + parser.getPriority(childLink);
                         childLink.setPriority(priority);
                         if (queue.add(childLink)) {
                             n++;
@@ -132,10 +135,11 @@ public class Fetcher implements Runnable {
                 }
 
             }
-            nfo += "    - Links : " + n + "\r\n";
-            nfo += "    - Depth : " + link.getDepth() + "\r\n";
-            nfo += "    - Queue : " + queue.toString() + "\r\n";
         }
+        nfo += "    - Links : " + n + "\r\n";
+        nfo += "    - Depth : " + link.getDepth() + "\r\n";
+        nfo += "    - Priority : " + link.getPriority() + "\r\n";
+        nfo += "    - Queue : " + queue.toString() + "\r\n";
         log.info(nfo);
     }
 

@@ -14,7 +14,9 @@ public class UniquePriorityQueue extends PriorityQueue<Link> {
     private Set<Link> set = new HashSet<>();
 
     public UniquePriorityQueue() {
-        super(Comparator.comparingInt(Link::getPriority));
+        super((o1, o2) -> {
+            return o2.getPriority() - o1.getPriority();
+        });
     }
 
     @Override
