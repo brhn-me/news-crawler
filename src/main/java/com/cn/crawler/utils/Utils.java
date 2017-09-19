@@ -211,7 +211,7 @@ public class Utils {
 
             String protocol = url.getProtocol();
             if (!"http".equals(protocol) && !"https".equals(protocol)) {
-                throw new InvalidLinkException(inputUrl, "Invalid protocol");
+                return null;
             }
 
             URI uri = new URI(url.getProtocol(), url.getUserInfo(), url.getHost(), url.getPort(), url.getPath(), url.getQuery(), url.getRef());
