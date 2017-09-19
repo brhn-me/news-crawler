@@ -37,7 +37,7 @@ public class Agent {
         return parser;
     }
 
-    public void saveState(){
+    public void saveState() {
         queue.saveState();
     }
 }

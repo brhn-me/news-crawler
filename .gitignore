@@ -25,3 +25,7 @@ nbdist/
 
 #crawler
 output.log
+output.log.*
+runtime/crawl
+runtime/*.jar
+*.tar.gz

@@ -20,7 +20,7 @@ import java.util.*;
 /**
  * Created by burhan on 5/31/17.
  */
-public class Queue implements java.util.Queue<Link>{
+public class Queue implements java.util.Queue<Link> {
     private static final Logger log = LoggerFactory.getLogger(Queue.class);
 
     private final String host;
@@ -47,11 +47,11 @@ public class Queue implements java.util.Queue<Link>{
         return queue.size();
     }
 
-    public int getVisitedSize(){
+    public int getVisitedSize() {
         return visited.size();
     }
 
-    public int getErrorSize(){
+    public int getErrorSize() {
         return error.size();
     }
 
@@ -65,7 +65,7 @@ public class Queue implements java.util.Queue<Link>{
         return queue.contains(o);
     }
 
-    public boolean isVisited(Object o){
+    public boolean isVisited(Object o) {
         return visited.contains(o);
     }
 
@@ -86,13 +86,13 @@ public class Queue implements java.util.Queue<Link>{
 
     @Override
     public boolean add(Link link) {
-        if(!host.equalsIgnoreCase(link.getHost())){
+        if (!host.equalsIgnoreCase(link.getHost())) {
             return false;
         }
-        if(rule != null && !rule.isExplorable(link)){
+        if (rule != null && !rule.isExplorable(link)) {
             return false;
         }
-        if(queue.contains(link) || visited.contains(link) || error.contains(link)){
+        if (queue.contains(link) || visited.contains(link) || error.contains(link)) {
             return false;
         }
         trackChanges(link);
@@ -155,32 +155,32 @@ public class Queue implements java.util.Queue<Link>{
         return queue.peek();
     }
 
-    public boolean setVisited(Link link){
+    public boolean setVisited(Link link) {
         link.setStatus(Status.V);
         link.setDate(new Date());
         trackChanges(link);
         return visited.add(link);
     }
 
-    public boolean setError(Link link){
+    public boolean setError(Link link) {
         link.setStatus(Status.E);
         link.setDate(new Date());
         trackChanges(link);
         return error.add(link);
     }
 
-    private void trackChanges(Link link){
+    private void trackChanges(Link link) {
         changes.add(link);
-        if(changes.size() >= BATCH_MAX){
+        if (changes.size() >= BATCH_MAX) {
             log.info("Saving current state for queue : " + host);
             data.saveLinks(changes);
             changes.clear();
         }
     }
 
-    public void loadState(final boolean update){
+    public void loadState(final boolean update) {
         List<Link> links = data.getLinksByHost(host);
-        if(update) {
+        if (update) {
             queue.addAll(links);
         } else {
             for (Link link : links) {
@@ -197,13 +197,13 @@ public class Queue implements java.util.Queue<Link>{
     }
 
 
-    public void saveState(){
+    public void saveState() {
         Set<Link> all = new HashSet<>(changes);
         all.addAll(queue);
         all.addAll(visited);
         all.addAll(error);
         data.saveLinks(new ArrayList<>(all));
-        log.info("Saved state for : " + host +", " +this.toString());
+        log.info("Saved state for : " + host + ", " + this.toString());
     }
 
     @Override
@@ -214,64 +214,5 @@ public class Queue implements java.util.Queue<Link>{
                 ", error=" + error.size() +
                 ", queue=" + queue.size() +
                 '}';
-    }
-
-
-
-
-    public static void main(String[] args) {
-        LinkedHashSet<Link> queue = new LinkedHashSet<>();
-
-        Link link = null;
-        try {
-            link = new Link("http://www.prothom-alo.com", 0);
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        } catch (URISyntaxException e) {
-            e.printStackTrace();
-        }
-
-        queue.add(link);
-
-        while(true){
-            Iterator<Link> it = queue.iterator();
-            if(it.hasNext()){
-                link = it.next();
-                queue.remove(link);
-            }
-            System.out.println("Fetching ["+queue.size()+"]: " + link.getUrl());
-            try {
-                String url = Utils.getEncodedUrl(link.getUrl());
-                Connection.Response response = Jsoup
-                        .connect(url)
-                        .userAgent("Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:25.0) Gecko/20100101 Firefox/25.0")
-                        .referrer("http://www.google.com")
-                        .timeout(60 * 1000)
-                        .execute();
-
-                Document doc = response.parse();
-
-                Elements linkElements = doc.select("a[href]");
-                for (Element linkElement : linkElements) {
-                    String childUrl = linkElement.absUrl("href");
-                    if (!Utils.isNullOrEmpty(childUrl)) {
-                        try {
-                            Link l = new Link(childUrl, link.getDepth() + 1);
-                            queue.add(l);
-                        } catch (MalformedURLException e) {
-                            log.error(e.getMessage() + link);
-                        } catch (URISyntaxException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-
-
     }
 }

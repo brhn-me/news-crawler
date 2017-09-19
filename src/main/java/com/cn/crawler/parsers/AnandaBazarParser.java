@@ -1,6 +1,7 @@
 package com.cn.crawler.parsers;
 
 import com.cn.crawler.core.AbstractParser;
+import com.cn.crawler.core.Fetcher;
 import com.cn.crawler.core.ParseException;
 import com.cn.crawler.entities.Link;
 import com.cn.crawler.entities.News;
@@ -8,14 +9,25 @@ import com.cn.crawler.utils.Utils;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.io.UnsupportedEncodingException;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
  * Created by burhan on 5/19/17.
  */
 public class AnandaBazarParser extends AbstractParser {
+    private static final Logger log = LoggerFactory.getLogger(AnandaBazarParser.class);
+
     public AnandaBazarParser() {
     }
 
@@ -85,5 +97,28 @@ public class AnandaBazarParser extends AbstractParser {
         news.setImages(images);
 
         return news;
+    }
+
+    @Override
+    public URI normalize(URI uri) {
+        try {
+            Map<String, List<String>> params = Utils.parseQueryString(uri.toURL());
+            params.remove("ref");
+            String queryString = Utils.getQueryString(params);
+            uri = new URI(uri.getScheme(),
+                    uri.getUserInfo(), uri.getHost(), uri.getPort(),
+            uri.getPath(), queryString, null);
+            return uri;
+
+        } catch (UnsupportedEncodingException e) {
+            log.error(e.getMessage());
+        } catch (MalformedURLException e) {
+            log.error(e.getMessage());
+        } catch (URISyntaxException e) {
+            log.error(e.getMessage());
+        } catch (NullPointerException e){
+            System.err.println(uri.toString());
+        }
+        return uri;
     }
 }

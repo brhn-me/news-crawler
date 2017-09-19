@@ -11,9 +11,9 @@ import org.springframework.stereotype.Service;
 @Service
 public class Params {
     @Parameter(names = {"--seed", "-s"}, description = "Directory of seed files", required = true)
-    private String seedPath;
+    private String seedPath = "seed";
     @Parameter(names = {"--crawl", "-c"}, description = "Path to save crawled contents", validateWith = ValidDirectory.class)
-    private String crawlPath;
+    private String crawlPath = null;
     @Parameter(names = {"--depth", "-d"}, description = "Maximum depth of web to explore", validateWith = PositiveInteger.class)
     private Integer depth = 1;
 

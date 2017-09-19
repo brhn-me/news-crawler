@@ -27,7 +27,6 @@ import java.util.regex.Pattern;
  * Created by burhan on 5/31/17.
  */
 public class Fetcher implements Runnable {
-    private static final String EXCLUDE_EXT_PATTERN = "([^\\s]+(\\.(?i)(jpg|png|gif|bmp|ttf|xml|json|pdf))$)";
     private static final Logger log = LoggerFactory.getLogger(Fetcher.class);
 
     private final Crawler crawler;
@@ -73,24 +72,15 @@ public class Fetcher implements Runnable {
         return response;
     }
 
-    private boolean isValidResposeType(String responseType) {
+    private static boolean isValidResposeType(String responseType) {
         return responseType.split(";")[0].equalsIgnoreCase("text/html");
     }
 
-    private boolean isValidUrl(String url) {
-        url = url.toLowerCase();
-        Pattern pattern = Pattern.compile(EXCLUDE_EXT_PATTERN);
-        Matcher matcher = pattern.matcher(url);
-        if (matcher.matches()) {
-            return false;
-        }
-        return true;
-    }
 
     public void explore(Link link) throws IOException {
         String nfo = "\r\n" +
-                    "Exploring : " + link.getUrl() +"\r\n"
-                +   "    - Fetching...\r\n";
+                "Exploring : " + link.getUrl() + "\r\n"
+                + "    - Fetching...\r\n";
         Connection.Response response = fetch(link);
         if (!isValidResposeType(response.contentType())) {
             return;
@@ -120,30 +110,31 @@ public class Fetcher implements Runnable {
                 link.setNews(true);
             }
         } catch (ParseException e) {
-            log.error("Failed to parse link : " + link);
+            log.error(e.getMessage());
         }
         int n = 0;
         if (link.getDepth() < maxDepth) {
             Elements linkElements = doc.select("a[href]");
             for (Element linkElement : linkElements) {
                 String url = linkElement.absUrl("href");
-                if (!Utils.isNullOrEmpty(url) && isValidUrl(url)) {
-                    try {
-                        Link l = new Link(url, link.getDepth() + 1);
-                        l.setPriority(parser.getPriority(l));
-                        if(queue.add(l)){
+                Link childLink = null;
+                try {
+                    childLink = Utils.createLink(url, link.getDepth() + 1);
+                    if(childLink != null) {
+                        int priority = parser.getPriority(childLink);
+                        childLink.setPriority(priority);
+                        if (queue.add(childLink)) {
                             n++;
                         }
-                    } catch (MalformedURLException e) {
-                        log.error(e.getMessage() + link);
-                    } catch (URISyntaxException e) {
-                        log.error(e.getMessage() + link);
                     }
+                } catch (InvalidLinkException e) {
+                    log.error(e.getMessage());
                 }
+
             }
-            nfo += "    - Links : "+n + "\r\n";
-            nfo += "    - Depth : "+link.getDepth() + "\r\n";
-            nfo += "    - Queue : "+queue.toString() + "\r\n";
+            nfo += "    - Links : " + n + "\r\n";
+            nfo += "    - Depth : " + link.getDepth() + "\r\n";
+            nfo += "    - Queue : " + queue.toString() + "\r\n";
         }
         log.info(nfo);
     }

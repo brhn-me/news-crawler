@@ -6,6 +6,7 @@ import com.cn.crawler.parsers.*;
 import com.cn.crawler.rules.AbstractExploreRule;
 import com.cn.crawler.rules.BBCBanglaExploreRule;
 import com.cn.crawler.rules.RoarBanglaExploreRule;
+import com.cn.crawler.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.mongodb.core.aggregation.ArithmeticOperators;
@@ -48,7 +49,8 @@ public class Crawler {
 
     }
 
-    public void boostrap(Params params){
+    public void boostrap(Params params) {
+        //data.migrate();
         this.setParams(params);
         this.loadSeeds(params.getSeedPath());
         this.registerParsers();
@@ -73,7 +75,7 @@ public class Crawler {
         return data;
     }
 
-    public void registerParsers(){
+    public void registerParsers() {
         // news sites
         parsers.put("prothom-alo.com", ProthomAloParser.class);
         parsers.put("bangla.bdnews24.com", BDNews24BanglaParser.class);
@@ -96,7 +98,7 @@ public class Crawler {
         parsers.put("roar.media", RoarBanglaParser.class);
     }
 
-    public void registerRules(){
+    public void registerRules() {
         rules.put("bbc.com", BBCBanglaExploreRule.class);
         rules.put("roar.media", RoarBanglaExploreRule.class);
     }
@@ -115,18 +117,15 @@ public class Crawler {
                     while (scanner.hasNextLine()) {
                         String url = scanner.nextLine();
                         // ignore commented
-                        if(url.startsWith("#")){
+                        if (url.startsWith("#")) {
                             continue;
                         }
+                        Link link = null;
                         try {
-                            Link link = new Link(url, 0);
+                            link = Utils.createLink(url, 0);
                             links.add(link);
-                        } catch (MalformedURLException e) {
-                            e.printStackTrace();
-                        } catch (UnsupportedEncodingException e) {
-                            e.printStackTrace();
-                        } catch (URISyntaxException e) {
-                            e.printStackTrace();
+                        } catch (InvalidLinkException e) {
+                            log.error(e.getMessage());
                         }
                     }
                     scanner.close();
@@ -144,38 +143,38 @@ public class Crawler {
         for (Link link : this.seeds) {
             String host = link.getHost();
 
-            if(!parsers.containsKey(host)){
-                log.error("Parser not found for host '"+ host + "'. Seed url '"+ link.getUrl() + "' would be ignored");
+            if (!parsers.containsKey(host)) {
+                log.error("Parser not found for host '" + host + "'. Seed url '" + link.getUrl() + "' would be ignored");
                 continue;
             }
             Class type = parsers.get(host);
             AbstractParser parser = null;
             try {
                 parser = (AbstractParser) type.newInstance();
-            } catch (InstantiationException ex){
-                log.error("Failed to instantiate parser for host : "+ host + ". Seed url '"+ link.getUrl() + "' would be ignored");
+            } catch (InstantiationException ex) {
+                log.error("Failed to instantiate parser for host : " + host + ". Seed url '" + link.getUrl() + "' would be ignored");
                 continue;
-            } catch (IllegalAccessException ex){
-                log.error("Failed to instantiate parser for host : "+ host + ". Seed url '"+ link.getUrl() + "' would be ignored");
+            } catch (IllegalAccessException ex) {
+                log.error("Failed to instantiate parser for host : " + host + ". Seed url '" + link.getUrl() + "' would be ignored");
                 continue;
             }
 
-            if(parser == null){
-                log.error("Parser not found for host : "+ host + ". Seed url '"+ link.getUrl() + "' would be ignored");
+            if (parser == null) {
+                log.error("Parser not found for host : " + host + ". Seed url '" + link.getUrl() + "' would be ignored");
                 continue;
             }
 
             if (!agents.containsKey(host)) {
                 Class ruleClass = rules.get(host);
                 AbstractExploreRule rule = null;
-                if(ruleClass!= null){
+                if (ruleClass != null) {
                     try {
                         rule = (AbstractExploreRule) ruleClass.newInstance();
-                        log.info("Custom rules instantiated for : "+host);
+                        log.info("Custom rules instantiated for : " + host);
                     } catch (InstantiationException e) {
-                        e.printStackTrace();
+                        log.error(e.getMessage());
                     } catch (IllegalAccessException e) {
-                        e.printStackTrace();
+                        log.error(e.getMessage());
                     }
                 }
                 Queue q = new Queue(data, host, rule);
@@ -192,9 +191,9 @@ public class Crawler {
     }
 
     public void start() {
-        log.info("Starting crawler...[Update Mood: "+ params.getUpdateLinks()+ "]");
+        log.info("Starting crawler...[Update Mood: " + params.getUpdateLinks() + "]");
 
-        for(int i = 0; i < config.getAgent().getFetchers(); i++){
+        for (int i = 0; i < config.getAgent().getFetchers(); i++) {
             for (String domain : agents.keySet()) {
                 Agent agent = agents.get(domain);
                 agent.createFetcher(executor);
@@ -208,7 +207,7 @@ public class Crawler {
         executor.shutdown();
     }
 
-    public void shutdown(){
+    public void shutdown() {
         log.info("Shutting down crawler...");
         for (String domain : agents.keySet()) {
             Agent agent = agents.get(domain);
@@ -218,7 +217,7 @@ public class Crawler {
 
 
     @PreDestroy
-    public void destroy(){
+    public void destroy() {
         shutdown();
     }
 }

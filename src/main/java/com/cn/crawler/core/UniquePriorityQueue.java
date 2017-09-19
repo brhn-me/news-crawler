@@ -19,7 +19,7 @@ public class UniquePriorityQueue extends PriorityQueue<Link> {
 
     @Override
     public boolean add(Link link) {
-        if(set.contains(link)){
+        if (set.contains(link)) {
             return false;
         }
         return super.add(link);
@@ -51,7 +51,7 @@ public class UniquePriorityQueue extends PriorityQueue<Link> {
     @Override
     public Link peek() {
         Link link = super.peek();
-        if(link!=null) {
+        if (link != null) {
             set.remove(link);
         }
         return link;
@@ -60,7 +60,7 @@ public class UniquePriorityQueue extends PriorityQueue<Link> {
     @Override
     public Link poll() {
         Link link = super.poll();
-        if(link!=null) {
+        if (link != null) {
             set.remove(link);
         }
         return link;

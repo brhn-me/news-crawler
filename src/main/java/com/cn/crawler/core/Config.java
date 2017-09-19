@@ -28,7 +28,7 @@ public class Config {
         return agent;
     }
 
-    public static class Database{
+    public static class Database {
         private String uri;
         private String collection;
 
@@ -49,7 +49,7 @@ public class Config {
         }
     }
 
-    public static class Agent{
+    public static class Agent {
         private int fetchers;
 
         public int getFetchers() {
@@ -61,7 +61,7 @@ public class Config {
         }
     }
 
-    public static class Fetcher{
+    public static class Fetcher {
         private int pool;
         private int timeout;
         private int delay;
@@ -89,5 +89,5 @@ public class Config {
         public void setDelay(int delay) {
             this.delay = delay;
         }
-   }
+    }
 }

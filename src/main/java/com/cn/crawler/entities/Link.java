@@ -1,6 +1,7 @@
 package com.cn.crawler.entities;
 
 import com.cn.crawler.core.Status;
+import com.cn.crawler.utils.NormalizeURL;
 import com.cn.crawler.utils.Utils;
 import org.springframework.data.annotation.Id;
 
@@ -8,6 +9,8 @@ import java.io.UnsupportedEncodingException;
 import java.net.*;
 import java.security.NoSuchAlgorithmException;
 import java.util.Date;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Created by burhan on 5/30/17.
@@ -16,6 +19,7 @@ public class Link {
     @Id
     private String id;
     private String url;
+    private String asciiUrl = null;
     private Status status;
     private String host;
     private int depth;
@@ -25,22 +29,6 @@ public class Link {
     private boolean isNews = false;
 
     public Link() {
-    }
-
-    public Link(String url, int depth) throws MalformedURLException, UnsupportedEncodingException, URISyntaxException {
-        URL u = new URL(url);
-        String domain = u.getHost();
-        this.url = Utils.getDecodedUrl(u.toString());
-        this.host = domain.startsWith("www.") ? domain.substring(4) : domain;
-        this.status = Status.Q;
-        this.depth = depth;
-        this.date = new Date();
-        try {
-            this.id = Utils.hash(this.url);
-        } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
-        }
-
     }
 
     public String getId() {
@@ -57,6 +45,14 @@ public class Link {
 
     public void setUrl(String url) {
         this.url = url;
+    }
+
+    public String getAsciiUrl() {
+        return asciiUrl;
+    }
+
+    public void setAsciiUrl(String asciiUrl) {
+        this.asciiUrl = asciiUrl;
     }
 
     public Status getStatus() {
@@ -133,6 +129,7 @@ public class Link {
         return "Link{" +
                 "id='" + id + '\'' +
                 ", url='" + url + '\'' +
+                ", asciiUrl='" + asciiUrl + '\'' +
                 ", status=" + status +
                 ", host='" + host + '\'' +
                 ", depth=" + depth +
