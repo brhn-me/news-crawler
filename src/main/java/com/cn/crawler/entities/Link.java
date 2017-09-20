@@ -19,7 +19,7 @@ public class Link {
     @Id
     private String id;
     private String url;
-    private String asciiUrl = null;
+    private String asciiUrl;
     private Status status;
     private String host;
     private int depth;

@@ -29,13 +29,14 @@ public abstract class AbstractParser {
 
     protected abstract News parseHandler(Link link, Document doc) throws ParseException;
 
-    public URI normalize(URI uri){
+    public URI normalize(URI uri) {
         return uri;
     }
 
-    public int getPriority(Link link){
+    public int getPriority(Link link) {
         return 0;
     }
+
 
     public News parse(Link link, Document doc) throws ParseException {
         if (isParsable(link, doc)) {
@@ -43,6 +44,26 @@ public abstract class AbstractParser {
                 log.debug(" - Parsing: " + link.getUrl());
                 News news = parseHandler(link, doc);
                 if (news != null) {
+                    // ensure title and content not empty
+                    String title = news.getTitle();
+                    String content = news.getContent();
+                    if (title == null) {
+                        throw new ParseException(link.getUrl(), "Empty title");
+                    }
+                    title = title.trim();
+                    if ("".equals(title)) {
+                        throw new ParseException(link.getUrl(), "Empty title");
+                    }
+
+                    if (content == null) {
+                        throw new ParseException(link.getUrl(), "Empty content");
+                    }
+                    content = content.trim();
+                    if ("".equals(content)) {
+                        throw new ParseException(link.getUrl(), "Empty content");
+                    }
+                    news.setTitle(title);
+                    news.setContent(content);
                     try {
                         news.setUrl(link.getUrl());
                         news.setId(link.getId());
@@ -114,12 +135,11 @@ public abstract class AbstractParser {
         //test("https://www.jugantor.com/anando-nagar/2017/09/15/155625/%E0%A6%85%E0%A7%8D%E0%A6%AF%E0%A6%BE%E0%A6%B2%E0%A6%AC%E0%A6%BE%E0%A6%AE-%E0%A6%A8%E0%A6%BE-%E0%A6%95%E0%A6%B0%E0%A6%B2%E0%A7%87-%E0%A6%B6%E0%A6%BF%E0%A6%B2%E0%A7%8D%E0%A6%AA%E0%A6%9F%E0%A6%BE%E0%A6%95%E0%A7%87-%E0%A6%AC%E0%A6%BE%E0%A6%81%E0%A6%9A%E0%A6%BE%E0%A6%A8%E0%A7%8B-%E0%A6%85%E0%A6%B8%E0%A6%AE%E0%A7%8D%E0%A6%AD%E0%A6%AC", JugantarParser.class);
         //test("http://www.anandabazar.com/bangladesh-news/bengal-will-listen-the-untold-story-of-bangladesh-1.676555?ref=bangladesh-news-ft-stry", AnandaBazarParser.class);
         //test("http://www.bbc.com/bengali/news-41308626", BBCBanglaParser.class);
-        AnandaBazarParser parser = new AnandaBazarParser();
-        try {
-            System.out.println(parser.normalize(new URI("http://www.anandabazar.com/feedback?ref=expelled-Footer")));
-        } catch (URISyntaxException e) {
-            e.printStackTrace();
-        }
+
+        //test("http://www.amritabazar.com/sports/news/31159/%E0%A6%86%E0%A6%AB%E0%A7%8D%E0%A6%B0%E0%A6%BF%E0%A6%95%E0%A6%BE%E0%A6%B0-%E0%A6%AC%E0%A6%BF%E0%A6%AA%E0%A6%95%E0%A7%8D%E0%A6%B7%E0%A7%87-%E0%A6%96%E0%A7%87%E0%A6%B2%E0%A6%BE%E0%A6%9F%E0%A6%BE-%E0%A6%B8%E0%A6%B9%E0%A6%9C-%E0%A6%B9%E0%A6%AC%E0%A7%87-%E0%A6%A8%E0%A6%BE-%E0%A6%AE%E0%A7%81%E0%A6%B6%E0%A6%AB%E0%A6%BF%E0%A6%95", AmritaBazarParser.class);
+        //test("https://www.dailyinqilab.com/article/96457/%E0%A6%AE%E0%A6%BF%E0%A7%9F%E0%A6%BE%E0%A6%A8%E0%A6%AE%E0%A6%BE%E0%A6%B0%E0%A7%87%E0%A6%B0-%E0%A6%AC%E0%A6%BF%E0%A6%B0%E0%A7%81%E0%A6%A6%E0%A7%8D%E0%A6%A7%E0%A7%87-%E0%A6%90%E0%A6%95%E0%A7%8D%E0%A6%AF%E0%A6%AC%E0%A6%A6%E0%A7%8D%E0%A6%A7-%E0%A6%B9%E0%A6%93%E0%A7%9F%E0%A6%BE%E0%A6%B0-%E0%A6%9C%E0%A6%A8%E0%A7%8D%E0%A6%AF-%E0%A6%93%E0%A6%86%E0%A6%87%E0%A6%B8%E0%A6%BF-%E0%A6%A8%E0%A7%87%E0%A6%A4%E0%A6%BE%E0%A6%A6%E0%A7%87%E0%A6%B0-%E0%A6%AA%E0%A7%8D%E0%A6%B0%E0%A6%A4%E0%A6%BF-%E0%A6%AA%E0%A7%8D%E0%A6%B0%E0%A6%A7%E0%A6%BE%E0%A6%A8%E0%A6%AE%E0%A6%A8%E0%A7%8D%E0%A6%A4%E0%A7%8D%E0%A6%B0%E0%A7%80%E0%A6%B0-%E0%A6%86%E0%A6%B9%E0%A6%AC%E0%A6%BE%E0%A6%A8", InqilabParser.class);
+        //test("http://www.dailysangram.com/post/300455-%E0%A6%B0%E0%A7%8B%E0%A6%B9%E0%A6%BF%E0%A6%99%E0%A7%8D%E0%A6%97%E0%A6%BE-%E0%A6%B6%E0%A6%BF%E0%A6%AC%E0%A6%BF%E0%A6%B0%E0%A7%87-%E0%A6%AA%E0%A6%BE%E0%A6%B9%E0%A6%BE%E0%A7%9C-%E0%A6%A7%E0%A6%B8%E0%A7%87%E0%A6%B0-%E0%A6%86%E0%A6%B6%E0%A6%99%E0%A7%8D%E0%A6%95%E0%A6%BE", SangramParser.class);
+        test("http://www.gonokantho.com/details.php?id=46502", GonoKanthoParser.class);
 
     }
 }

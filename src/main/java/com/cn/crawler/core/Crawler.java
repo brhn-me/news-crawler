@@ -94,6 +94,10 @@ public class Crawler {
         parsers.put("jugantor.com", JugantarParser.class);
         parsers.put("anandabazar.com", AnandaBazarParser.class);
         parsers.put("bbc.com", BBCBanglaParser.class);
+        parsers.put("amritabazar.com", AmritaBazarParser.class);
+        parsers.put("dailyinqilab.com", InqilabParser.class);
+        parsers.put("dailysangram.com", SangramParser.class);
+        parsers.put("gonokantho.com", GonoKanthoParser.class);
 
         // blogs
         parsers.put("roar.media", RoarBanglaParser.class);
@@ -196,9 +200,14 @@ public class Crawler {
         log.info("Starting crawler...[Update Mood: " + params.getUpdateLinks() + "]");
 
         for (int i = 0; i < config.getAgent().getFetchers(); i++) {
-            for (String domain : agents.keySet()) {
-                Agent agent = agents.get(domain);
+            for (String host : agents.keySet()) {
+                Agent agent = agents.get(host);
                 agent.createFetcher(executor);
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
             }
             try {
                 Thread.sleep(5000);
@@ -216,13 +225,11 @@ public class Crawler {
     public void shutdown() {
         log.info("Shutting down crawler...");
         shuttingDown = true;
-        for (String domain : agents.keySet()) {
-            Agent agent = agents.get(domain);
+        for (String host : agents.keySet()) {
+            Agent agent = agents.get(host);
             agent.saveState();
         }
     }
-
-
 
 
     @PreDestroy
