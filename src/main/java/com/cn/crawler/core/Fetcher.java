@@ -121,7 +121,7 @@ public class Fetcher implements Runnable {
                 String url = linkElement.absUrl("href");
                 Link childLink = null;
                 try {
-                    childLink = Utils.createLink(url, link.getDepth() + 1);
+                    childLink = Utils.createLink(url, link.getDepth() + 1, parser);
                     if(childLink != null) {
                         // calculate priority
                         int priority = Math.abs(MAX_DEPTH - childLink.getDepth()) * DEPTH_WEIGHT + parser.getPriority(childLink);

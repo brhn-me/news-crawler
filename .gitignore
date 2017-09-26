@@ -24,6 +24,8 @@ nbdist/
 .nb-gradle/
 
 #crawler
+dump/
+logs/
 output.log
 output.log.*
 runtime/crawl
