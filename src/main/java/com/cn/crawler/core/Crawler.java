@@ -42,7 +42,7 @@ public class Crawler {
     private HashMap<String, Agent> agents = new HashMap<>();
     private HashMap<String, Class> parsers = new HashMap<>();
     private HashMap<String, Class> rules = new HashMap<>();
-    ExecutorService executor = Executors.newFixedThreadPool(100);
+    ExecutorService executor = Executors.newFixedThreadPool(500);
     private boolean shuttingDown = false;
 
 
@@ -202,11 +202,13 @@ public class Crawler {
         for (int i = 0; i < config.getAgent().getFetchers(); i++) {
             for (String host : agents.keySet()) {
                 Agent agent = agents.get(host);
-                agent.createFetcher(executor);
-                try {
-                    Thread.sleep(1000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
+                if(agent.getQueue().size() > 0) {
+                    agent.createFetcher(executor);
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
                 }
             }
             try {
@@ -227,7 +229,7 @@ public class Crawler {
         shuttingDown = true;
         for (String host : agents.keySet()) {
             Agent agent = agents.get(host);
-            agent.saveState();
+            agent.saveState(true);
         }
     }
 

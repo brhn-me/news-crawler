@@ -30,6 +30,7 @@ public class Queue implements java.util.Queue<Link> {
     private UniquePriorityQueue queue = new UniquePriorityQueue();
     private List<Link> changes = new ArrayList<>();
     private final AbstractExploreRule rule;
+    private boolean rejectSaveState = false;
     private static final int BATCH_MAX = 1000;
 
     public Queue(Data data, String host, AbstractExploreRule rule) {
@@ -204,6 +205,17 @@ public class Queue implements java.util.Queue<Link> {
         all.addAll(error);
         data.saveLinks(new ArrayList<>(all));
         log.info("Saved state for : " + host + ", " + this.toString());
+    }
+
+    /**
+     * reject save state calls from other threads while shutting down
+     * @param rejectSaveState
+     */
+    public void saveState(boolean rejectSaveState){
+        this.rejectSaveState = rejectSaveState;
+        if(!rejectSaveState){
+            saveState();
+        }
     }
 
     @Override

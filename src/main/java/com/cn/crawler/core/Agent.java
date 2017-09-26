@@ -40,7 +40,7 @@ public class Agent {
         return parser;
     }
 
-    public void saveState() {
-        queue.saveState();
+    public void saveState(boolean rejectSaveState) {
+        queue.saveState(rejectSaveState);
     }
 }

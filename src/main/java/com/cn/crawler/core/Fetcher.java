@@ -116,18 +116,20 @@ public class Fetcher implements Runnable {
         }
         int n = 0;
         if (link.getDepth() < maxDepth) {
+            nfo += "    - Extracted: \r\n";
             Elements linkElements = doc.select("a[href]");
             for (Element linkElement : linkElements) {
                 String url = linkElement.absUrl("href");
                 Link childLink = null;
                 try {
                     childLink = Utils.createLink(url, link.getDepth() + 1, parser);
-                    if(childLink != null) {
+                    if(childLink != null && !link.equals(childLink)) {
                         // calculate priority
                         int priority = Math.abs(MAX_DEPTH - childLink.getDepth()) * DEPTH_WEIGHT + parser.getPriority(childLink);
                         childLink.setPriority(priority);
                         if (queue.add(childLink)) {
                             n++;
+                            nfo += "        - "+ childLink.getUrl() + "\r\n";
                         }
                     }
                 } catch (InvalidLinkException e) {
@@ -169,6 +171,7 @@ public class Fetcher implements Runnable {
             Link link = getNextUrl();
             if (link == null && queue.size() < 1) {
                 log.info("Queue empty. Fetcher shutting down on : " + queue.getHost());
+                queue.saveState();
                 break;
             }
             try {
