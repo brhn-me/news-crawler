@@ -27,8 +27,15 @@ EXPORT_PATH = "dump"
 
 client = MongoClient("mongodb://localhost:27017")
 db = client["test"]
-cursor = db.link.find({"status": "V", "host": "anandabazar.com"})
 
+cursor = db.news.find()
+print("Dumping news...")
 df = pd.DataFrame(list(cursor))
-df.sort_values(by=['url'])
-df.to_csv("dump/links.v.csv", columns=["depth", "url"])
+df.to_csv("dump/news.csv")
+print("Dumped: %s" % len(df))
+
+cursor = db.link.find()
+print("Dumping links...")
+df = pd.DataFrame(list(cursor))
+df.to_csv("dump/link.csv")
+print("Dumped: %s" % len(df))

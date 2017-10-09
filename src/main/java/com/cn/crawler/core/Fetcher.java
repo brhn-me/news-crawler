@@ -116,7 +116,6 @@ public class Fetcher implements Runnable {
         }
         int n = 0;
         if (link.getDepth() < maxDepth) {
-            nfo += "    - Extracted: \r\n";
             Elements linkElements = doc.select("a[href]");
             for (Element linkElement : linkElements) {
                 String url = linkElement.absUrl("href");
@@ -129,7 +128,7 @@ public class Fetcher implements Runnable {
                         childLink.setPriority(priority);
                         if (queue.add(childLink)) {
                             n++;
-                            nfo += "        - "+ childLink.getUrl() + "\r\n";
+                            nfo += "        Extracted - "+ childLink.getUrl() + "\r\n";
                         }
                     }
                 } catch (InvalidLinkException e) {
